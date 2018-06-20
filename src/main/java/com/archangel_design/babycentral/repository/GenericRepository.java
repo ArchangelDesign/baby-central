@@ -30,10 +30,19 @@ public abstract class GenericRepository {
         return em.merge(locationEntity);
     }
 
-
     @Transactional()
     public ScheduleEntity save(@NotNull final ScheduleEntity scheduleEntity) {
         return em.merge(scheduleEntity);
+    }
+
+    @Transactional()
+    public ShoppingCardEntity save(@NotNull final ShoppingCardEntity shoppingCardEntity) {
+        return em.merge(shoppingCardEntity);
+    }
+
+    @Transactional()
+    public ShoppingCardEntryEntity save(@NotNull final ShoppingCardEntryEntity shoppingCardEntryEntity) {
+        return em.merge(shoppingCardEntryEntity);
     }
 
     @Transactional()
