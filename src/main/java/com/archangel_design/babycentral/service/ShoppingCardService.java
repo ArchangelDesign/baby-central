@@ -68,17 +68,6 @@ public class ShoppingCardService {
         return shoppingCardRepository.fetchList(user, uuid);
     }
 
-    public ShoppingCardEntryEntity toggleIsPurchased(String uuid) {
-        ShoppingCardEntryEntity shoppingCardEntryEntity = shoppingCardRepository.fetchEntry(uuid);
-
-        if (shoppingCardEntryEntity == null)
-            throw new InvalidArgumentException("shoppingCardEntryEntity does not exist.");
-
-        shoppingCardEntryEntity.setIsPurchased(!shoppingCardEntryEntity.getIsPurchased());
-
-        return shoppingCardRepository.save(shoppingCardEntryEntity);
-    }
-
     public ShoppingCardEntity assignShoppingCard(String uuid, List<String> users) {
         ShoppingCardEntity shoppingCardEntity = shoppingCardRepository.fetch(uuid);
 
@@ -158,6 +147,17 @@ public class ShoppingCardService {
 
         shoppingCardEntryEntity.setArticleName(articleName);
         shoppingCardEntryEntity.setQuantity(quantity);
+
+        return shoppingCardRepository.save(shoppingCardEntryEntity);
+    }
+
+    public ShoppingCardEntryEntity setPurchased(String uuid, Boolean purchased) {
+        ShoppingCardEntryEntity shoppingCardEntryEntity = shoppingCardRepository.fetchEntry(uuid);
+
+        if (shoppingCardEntryEntity == null)
+            throw new InvalidArgumentException("shoppingCardEntryEntity does not exist.");
+
+        shoppingCardEntryEntity.setIsPurchased(purchased);
 
         return shoppingCardRepository.save(shoppingCardEntryEntity);
     }

@@ -69,4 +69,18 @@ public class ScheduleController {
     ) {
         return scheduleService.fetch(uuid);
     }
+
+    @DeleteMapping("/{uuid}")
+    public void removeScheduleEntity(
+            @PathVariable String uuid
+    ) {
+        scheduleService.removeScheduleEntity(uuid);
+    }
+
+    @DeleteMapping("/entry/{uuid}")
+    public void removeScheduleEntryEntity(
+            @PathVariable String uuid
+    ) {
+        scheduleService.removeScheduleEntryEntity(uuid);
+    }
 }

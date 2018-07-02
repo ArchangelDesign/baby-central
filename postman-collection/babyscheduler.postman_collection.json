@@ -149,6 +149,33 @@
 			"response": []
 		},
 		{
+			"name": "invite to organization",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Token {{bstoken}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "wrongemail"
+				},
+				"url": {
+					"raw": "{{bsurl}}/user/invite",
+					"host": [
+						"{{bsurl}}"
+					],
+					"path": [
+						"user",
+						"invite"
+					]
+				}
+			},
+			"response": []
+		},
+		{
 			"name": "update profile",
 			"request": {
 				"method": "POST",
@@ -176,6 +203,130 @@
 						"update-profile"
 					]
 				}
+			},
+			"response": []
+		},
+		{
+			"name": "user avatar",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Token {{bstoken}}"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "file",
+							"description": "",
+							"type": "file"
+						}
+					]
+				},
+				"url": {
+					"raw": "{{bsurl}}/user/avatar/fd96da9e-896e-47aa-803e-47799383f15a",
+					"host": [
+						"{{bsurl}}"
+					],
+					"path": [
+						"user",
+						"avatar",
+						"fd96da9e-896e-47aa-803e-47799383f15a"
+					]
+				},
+				"description": "set-avatar"
+			},
+			"response": []
+		},
+		{
+			"name": "user avatar",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Token {{bstoken}}"
+					}
+				],
+				"body": {},
+				"url": {
+					"raw": "{{bsurl}}/user/avatar/0a0f4ecf-2860-46e6-9f42-4da30c0584dd",
+					"host": [
+						"{{bsurl}}"
+					],
+					"path": [
+						"user",
+						"avatar",
+						"0a0f4ecf-2860-46e6-9f42-4da30c0584dd"
+					]
+				},
+				"description": "get avatar"
+			},
+			"response": []
+		},
+		{
+			"name": "baby list",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Token {{bstoken}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "{{bsurl}}/user/babies",
+					"host": [
+						"{{bsurl}}"
+					],
+					"path": [
+						"user",
+						"babies"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "baby",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Token {{bstoken}}"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"birthday\": \"2018-06-21T13:48:36.136Z\",\n  \"gender\": \"MALE\",\n  \"name\": \"Wojtek\"\n}"
+				},
+				"url": {
+					"raw": "{{bsurl}}/user/baby",
+					"host": [
+						"{{bsurl}}"
+					],
+					"path": [
+						"user",
+						"baby"
+					]
+				},
+				"description": "post new baby"
 			},
 			"response": []
 		},
@@ -211,6 +362,74 @@
 			"response": []
 		},
 		{
+			"name": "baby avatar",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Token {{bstoken}}"
+					}
+				],
+				"body": {},
+				"url": {
+					"raw": "{{bsurl}}/user/baby/avatar/31aeb959-273c-4f38-b01e-34f65d9dfaa0",
+					"host": [
+						"{{bsurl}}"
+					],
+					"path": [
+						"user",
+						"baby",
+						"avatar",
+						"31aeb959-273c-4f38-b01e-34f65d9dfaa0"
+					]
+				},
+				"description": "get baby avatar"
+			},
+			"response": []
+		},
+		{
+			"name": "baby avatar",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Token {{bstoken}}"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "file",
+							"value": "",
+							"description": "",
+							"type": "file"
+						}
+					]
+				},
+				"url": {
+					"raw": "{{bsurl}}/user/baby/avatar/31aeb959-273c-4f38-b01e-34f65d9dfaa0",
+					"host": [
+						"{{bsurl}}"
+					],
+					"path": [
+						"user",
+						"baby",
+						"avatar",
+						"31aeb959-273c-4f38-b01e-34f65d9dfaa0"
+					]
+				},
+				"description": "post baby avatar"
+			},
+			"response": []
+		},
+		{
 			"name": "create schedule",
 			"request": {
 				"method": "POST",
@@ -226,7 +445,7 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n\t\"name\": \"Default schedule\",\n\t\"babyId\": \"172944bb-864e-4d5e-a7f6-08309caf2eca\"\n}"
+					"raw": "{\n\t\"name\": \"Something\",\n\t\"babyUuid\": \"c679e7ed-d0ff-43e9-a63a-89167f837480\"\n}"
 				},
 				"url": {
 					"raw": "{{bsurl}}/schedule/create-schedule",
@@ -268,7 +487,7 @@
 			},
 			"response": [
 				{
-					"id": "9ef93eae-b911-46c8-92a5-1a8f21aa7233",
+					"id": "f9f615f3-e72e-4de5-b47b-a3823e6a286a",
 					"name": "schedule list",
 					"originalRequest": {
 						"method": "GET",
@@ -358,7 +577,58 @@
 			]
 		},
 		{
-			"name": "shedule create entry",
+			"name": "remove-schedule",
+			"request": {
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Token {{bstoken}}"
+					}
+				],
+				"body": {},
+				"url": {
+					"raw": "{{bsurl}}/schedule/c1141446-b0f9-4448-b18c-ee7215b68da2",
+					"host": [
+						"{{bsurl}}"
+					],
+					"path": [
+						"schedule",
+						"c1141446-b0f9-4448-b18c-ee7215b68da2"
+					]
+				},
+				"description": "remove-shedule"
+			},
+			"response": []
+		},
+		{
+			"name": "remove-schedule-entry",
+			"request": {
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Token {{bstoken}}"
+					}
+				],
+				"body": {},
+				"url": {
+					"raw": "{{bsurl}}/schedule/entry/de6",
+					"host": [
+						"{{bsurl}}"
+					],
+					"path": [
+						"schedule",
+						"entry",
+						"de6"
+					]
+				},
+				"description": "remove-shedule-entry"
+			},
+			"response": []
+		},
+		{
+			"name": "schedule create entry",
 			"request": {
 				"method": "POST",
 				"header": [
@@ -373,71 +643,17 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n\t\"entryType\": \"SLEEP\",\n\t\"start\": \"21:00:00\",\n\t\"stop\": \"06:30:00\",\n\t\"priority\": \"MEDIUM\",\n\t\"repeatType\": \"DAILY\",\n\t\"startDate\": \"2015-01-01T00:00:00\",\n\t\"endDate\": \"2020-01-01T00:00:00\",\n\t\"title\": \"sdfsdfsdf\"\n}"
+					"raw": "{\n\t\"entryType\": \"SLEEP\",\n\t\"start\": \"21:00:00\",\n\t\"stop\": \"06:30:00\",\n\t\"priority\": \"MEDIUM\",\n\t\"repeatType\": \"DAILY\",\n\t\"startDate\": \"2015-06-28T09:19:00\",\n\t\"endDate\": \"2020-01-01T00:00:00\",\n\t\"title\": \"sdfsdfsdf\"\n}"
 				},
 				"url": {
-					"raw": "{{bsurl}}/schedule/entry/42abecba-ba02-4b9b-abf6-8dc40fe3ea57",
+					"raw": "{{bsurl}}/schedule/entry/4c085741-6134-4b39-9844-fcebd6d0f41e",
 					"host": [
 						"{{bsurl}}"
 					],
 					"path": [
 						"schedule",
 						"entry",
-						"42abecba-ba02-4b9b-abf6-8dc40fe3ea57"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "baby list",
-			"request": {
-				"method": "GET",
-				"header": [
-					{
-						"key": "Authorization",
-						"value": "Token {{bstoken}}"
-					}
-				],
-				"body": {
-					"mode": "raw",
-					"raw": ""
-				},
-				"url": {
-					"raw": "{{bsurl}}/user/babies",
-					"host": [
-						"{{bsurl}}"
-					],
-					"path": [
-						"user",
-						"babies"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "invite to organization",
-			"request": {
-				"method": "POST",
-				"header": [
-					{
-						"key": "Authorization",
-						"value": "Token {{bstoken}}"
-					}
-				],
-				"body": {
-					"mode": "raw",
-					"raw": "wrongemail"
-				},
-				"url": {
-					"raw": "{{bsurl}}/user/invite",
-					"host": [
-						"{{bsurl}}"
-					],
-					"path": [
-						"user",
-						"invite"
+						"4c085741-6134-4b39-9844-fcebd6d0f41e"
 					]
 				}
 			},
@@ -534,6 +750,57 @@
 			"response": []
 		},
 		{
+			"name": "remove-shopping-card",
+			"request": {
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Token {{bstoken}}"
+					}
+				],
+				"body": {},
+				"url": {
+					"raw": "{{bsurl}}/shopping-card/a866eb82-397f-43ff-8545-d9fa3443ca88",
+					"host": [
+						"{{bsurl}}"
+					],
+					"path": [
+						"shopping-card",
+						"a866eb82-397f-43ff-8545-d9fa3443ca88"
+					]
+				},
+				"description": "remove-shopping-card"
+			},
+			"response": []
+		},
+		{
+			"name": "remove-shopping-card-entry",
+			"request": {
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Token {{bstoken}}"
+					}
+				],
+				"body": {},
+				"url": {
+					"raw": "{{bsurl}}/shopping-card/entry/a866eb82-397f-43ff-8545-d9fa3443ca88",
+					"host": [
+						"{{bsurl}}"
+					],
+					"path": [
+						"shopping-card",
+						"entry",
+						"a866eb82-397f-43ff-8545-d9fa3443ca88"
+					]
+				},
+				"description": "remove-shopping-card"
+			},
+			"response": []
+		},
+		{
 			"name": "shoppingCard assign",
 			"request": {
 				"method": "POST",
@@ -567,100 +834,9 @@
 			"response": []
 		},
 		{
-			"name": "toggle shoppingCardEntry isPurchased",
+			"name": "set shoppingCardEntry isPurchased",
 			"request": {
-				"method": "GET",
-				"header": [
-					{
-						"key": "Authorization",
-						"value": "Token {{bstoken}}"
-					}
-				],
-				"body": {},
-				"url": {
-					"raw": "{{bsurl}}/shopping-card/toggle-purchased/bb1f9d86-83bf-4083-8390-cd4434441a9f",
-					"host": [
-						"{{bsurl}}"
-					],
-					"path": [
-						"shopping-card",
-						"toggle-purchased",
-						"bb1f9d86-83bf-4083-8390-cd4434441a9f"
-					]
-				},
-				"description": "toggleIsPurchased"
-			},
-			"response": []
-		},
-		{
-			"name": "user avatar",
-			"request": {
-				"method": "POST",
-				"header": [
-					{
-						"key": "Authorization",
-						"value": "Token {{bstoken}}"
-					},
-					{
-						"key": "Content-Type",
-						"value": "application/json"
-					}
-				],
-				"body": {
-					"mode": "formdata",
-					"formdata": [
-						{
-							"key": "file",
-							"description": "",
-							"type": "file"
-						}
-					]
-				},
-				"url": {
-					"raw": "{{bsurl}}/user/avatar/fd96da9e-896e-47aa-803e-47799383f15a",
-					"host": [
-						"{{bsurl}}"
-					],
-					"path": [
-						"user",
-						"avatar",
-						"fd96da9e-896e-47aa-803e-47799383f15a"
-					]
-				},
-				"description": "set-avatar"
-			},
-			"response": []
-		},
-		{
-			"name": "user avatar",
-			"request": {
-				"method": "GET",
-				"header": [
-					{
-						"key": "Authorization",
-						"value": "Token {{bstoken}}"
-					}
-				],
-				"body": {},
-				"url": {
-					"raw": "{{bsurl}}/user/avatar/0a0f4ecf-2860-46e6-9f42-4da30c0584dd",
-					"host": [
-						"{{bsurl}}"
-					],
-					"path": [
-						"user",
-						"avatar",
-						"0a0f4ecf-2860-46e6-9f42-4da30c0584dd"
-					]
-				},
-				"description": "get avatar"
-			},
-			"response": []
-		},
-		{
-			"name": "baby",
-			"request": {
-				"method": "POST",
+				"method": "PUT",
 				"header": [
 					{
 						"key": "Authorization",
@@ -673,87 +849,20 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n  \"birthday\": \"2018-06-21T13:48:36.136Z\",\n  \"gender\": \"MALE\",\n  \"name\": \"Wojtek\"\n}"
+					"raw": "{\n\t\"isPurchased\": \"true\"\n\t}"
 				},
 				"url": {
-					"raw": "{{bsurl}}/user/baby",
+					"raw": "{{bsurl}}/shopping-card/set-purchased/6b015bba-1ef0-461c-ba23-3ae786fd1c6f",
 					"host": [
 						"{{bsurl}}"
 					],
 					"path": [
-						"user",
-						"baby"
+						"shopping-card",
+						"set-purchased",
+						"6b015bba-1ef0-461c-ba23-3ae786fd1c6f"
 					]
 				},
-				"description": "post new baby"
-			},
-			"response": []
-		},
-		{
-			"name": "baby avatar",
-			"request": {
-				"method": "GET",
-				"header": [
-					{
-						"key": "Authorization",
-						"value": "Token {{bstoken}}"
-					}
-				],
-				"body": {},
-				"url": {
-					"raw": "{{bsurl}}/user/baby/avatar/31aeb959-273c-4f38-b01e-34f65d9dfaa0",
-					"host": [
-						"{{bsurl}}"
-					],
-					"path": [
-						"user",
-						"baby",
-						"avatar",
-						"31aeb959-273c-4f38-b01e-34f65d9dfaa0"
-					]
-				},
-				"description": "get baby avatar"
-			},
-			"response": []
-		},
-		{
-			"name": "baby avatar",
-			"request": {
-				"method": "POST",
-				"header": [
-					{
-						"key": "Authorization",
-						"value": "Token {{bstoken}}"
-					},
-					{
-						"key": "Content-Type",
-						"value": "application/json"
-					}
-				],
-				"body": {
-					"mode": "formdata",
-					"formdata": [
-						{
-							"key": "file",
-							"value": "",
-							"description": "",
-							"type": "file"
-						}
-					]
-				},
-				"url": {
-					"raw": "{{bsurl}}/user/baby/avatar/31aeb959-273c-4f38-b01e-34f65d9dfaa0",
-					"host": [
-						"{{bsurl}}"
-					],
-					"path": [
-						"user",
-						"baby",
-						"avatar",
-						"31aeb959-273c-4f38-b01e-34f65d9dfaa0"
-					]
-				},
-				"description": "post baby avatar"
+				"description": "toggleIsPurchased"
 			},
 			"response": []
 		},
@@ -836,57 +945,6 @@
 			"response": []
 		},
 		{
-			"name": "remove-shopping-card",
-			"request": {
-				"method": "DELETE",
-				"header": [
-					{
-						"key": "Authorization",
-						"value": "Token {{bstoken}}"
-					}
-				],
-				"body": {},
-				"url": {
-					"raw": "{{bsurl}}/shopping-card/a866eb82-397f-43ff-8545-d9fa3443ca88",
-					"host": [
-						"{{bsurl}}"
-					],
-					"path": [
-						"shopping-card",
-						"a866eb82-397f-43ff-8545-d9fa3443ca88"
-					]
-				},
-				"description": "remove-shopping-card"
-			},
-			"response": []
-		},
-		{
-			"name": "remove-shopping-card-entry",
-			"request": {
-				"method": "DELETE",
-				"header": [
-					{
-						"key": "Authorization",
-						"value": "Token {{bstoken}}"
-					}
-				],
-				"body": {},
-				"url": {
-					"raw": "{{bsurl}}/shopping-card/entry/a866eb82-397f-43ff-8545-d9fa3443ca88",
-					"host": [
-						"{{bsurl}}"
-					],
-					"path": [
-						"shopping-card",
-						"entry",
-						"a866eb82-397f-43ff-8545-d9fa3443ca88"
-					]
-				},
-				"description": "remove-shopping-card"
-			},
-			"response": []
-		},
-		{
 			"name": "update-shopping-card",
 			"request": {
 				"method": "PUT",
@@ -948,6 +1006,35 @@
 					]
 				},
 				"description": "remove-shopping-card"
+			},
+			"response": []
+		},
+		{
+			"name": "baby",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Token {{bstoken}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "{{bsurl}}/user/baby/e1012c30-67d0-4404-b733-418e7ee8d4fb",
+					"host": [
+						"{{bsurl}}"
+					],
+					"path": [
+						"user",
+						"baby",
+						"e1012c30-67d0-4404-b733-418e7ee8d4fb"
+					]
+				},
+				"description": "single baby"
 			},
 			"response": []
 		}

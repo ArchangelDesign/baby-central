@@ -69,4 +69,14 @@ public abstract class GenericRepository {
     public void delete(ShoppingCardEntity shoppingCardEntity) {
         em.remove(shoppingCardEntity);
     }
+
+    @Transactional()
+    public void delete(ScheduleEntity scheduleEntity) {
+        em.remove(scheduleEntity);
+    }
+
+    @Transactional()
+    public void delete(ScheduleEntryEntity scheduleEntryEntity) {
+        em.remove(scheduleEntryEntity);
+    }
 }
