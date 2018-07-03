@@ -9,13 +9,13 @@ package com.archangel_design.babycentral.controller;
 import com.archangel_design.babycentral.entity.BabyEntity;
 import com.archangel_design.babycentral.entity.ProfileEntity;
 import com.archangel_design.babycentral.entity.UserEntity;
+import com.archangel_design.babycentral.exception.UnreachableResourceException;
 import com.archangel_design.babycentral.request.LocationUpdateRequest;
 import com.archangel_design.babycentral.service.LocationService;
 import com.archangel_design.babycentral.service.SessionService;
 import com.archangel_design.babycentral.service.UserService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -29,7 +29,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.List;
 
 /**
@@ -40,14 +39,21 @@ import java.util.List;
 @Api(tags = "User operations")
 public class UserController {
 
-    @Autowired
-    UserService userService;
+    private final UserService userService;
 
-    @Autowired
-    LocationService locationService;
+    private final LocationService locationService;
 
-    @Autowired
-    SessionService sessionService;
+    private final SessionService sessionService;
+
+    public UserController(
+            final UserService userService,
+            final LocationService locationService,
+            final SessionService sessionService
+    ) {
+        this.userService = userService;
+        this.locationService = locationService;
+        this.sessionService = sessionService;
+    }
 
     @GetMapping("/my-account")
     public UserEntity myAccount() {
@@ -113,9 +119,7 @@ public class UserController {
     }
 
     @PostMapping("/invite")
-    public Boolean inviteUser(
-            @RequestBody String email
-    ) {
+    public Boolean inviteUser(@RequestBody String email) {
         return userService.inviteToOrganization(email);
     }
 
@@ -128,7 +132,7 @@ public class UserController {
     public void getUserAvatar(
             @PathVariable final String uuid,
             final HttpServletResponse response
-    ) throws IOException {
+    ) throws UnreachableResourceException {
         userService.getUserAvatar(uuid, response);
     }
 

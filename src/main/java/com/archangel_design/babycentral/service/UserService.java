@@ -13,6 +13,7 @@ import com.archangel_design.babycentral.entity.UserEntity;
 import com.archangel_design.babycentral.entity.ProfileEntity;
 import com.archangel_design.babycentral.exception.InvalidArgumentException;
 import com.archangel_design.babycentral.exception.PersistenceLayerException;
+import com.archangel_design.babycentral.exception.UnreachableResourceException;
 import com.archangel_design.babycentral.repository.UserRepository;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.validator.routines.EmailValidator;
@@ -303,7 +304,7 @@ public class UserService {
     public void getUserAvatar(
             final String uuid,
             final HttpServletResponse response
-    ) throws IOException { // TODO IOException? Zastąpić na własny
+    ) throws UnreachableResourceException {
         UserEntity user = userRepository.fetchByUuid(uuid);
 
         if (user == null)
@@ -312,9 +313,14 @@ public class UserService {
         byte[] avatarData = user.getAvatar();
 
         InputStream inputStream = new ByteArrayInputStream(avatarData);
-        OutputStream outputStream = response.getOutputStream();
-        IOUtils.copy(inputStream, outputStream);
-        response.flushBuffer();
+        try {
+            OutputStream outputStream = response.getOutputStream();
+            IOUtils.copy(inputStream, outputStream);
+            response.flushBuffer();
+        } catch (IOException exception) {
+            // TODO message
+            throw new UnreachableResourceException("");
+        }
     }
 
     public UserEntity setUserAvatar(String uuid, MultipartFile file) throws IOException {

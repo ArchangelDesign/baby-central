@@ -1,6 +1,5 @@
 package com.archangel_design.babycentral.entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import javax.persistence.*;
@@ -11,7 +10,7 @@ import java.util.UUID;
 
 @Entity
 @Table(name = "users")
-@JsonIgnoreProperties(value = {"id", "deleted", "password"})
+@JsonIgnoreProperties(value = {"id", "deleted", "password", "avatar"})
 public class UserEntity {
 
     @Id
@@ -53,7 +52,6 @@ public class UserEntity {
 
     @Lob
     @Column(columnDefinition = "mediumblob")
-    @JsonIgnore
     private byte[] avatar = new byte[0];
 
     public Long getId() {

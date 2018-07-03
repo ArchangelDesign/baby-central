@@ -86,7 +86,7 @@ public class ScheduleService {
         entry.setStartDate(dateStart);
         entry.setEndDate(dateStop);
         entry.setTitle(title);
-        entry.setOwner(scheduleEntity);
+        entry.setSchedule(scheduleEntity);
 
         scheduleEntity.getEntries().add(entry);
 

@@ -48,7 +48,9 @@ public class ScheduleEntryProcessor {
         scheduleEntries.forEach(this::resendAlertForScheduleEntry);
     }
 
-    public void resendAlertForScheduleEntry(final ScheduleEntryEntity scheduleEntry) {
+    private void resendAlertForScheduleEntry(
+            final ScheduleEntryEntity scheduleEntry
+    ) {
         sendPushNotificationForScheduleEntry(scheduleEntry);
     }
 
@@ -83,13 +85,10 @@ public class ScheduleEntryProcessor {
     ) {
         OneSignalPushNotification notification;
 
-        // TODO fu fu -> demeter?
-        if (Objects.isNull(scheduleEntry.getOwner().getUser().getOrganization()))
-            notification =
-                    oneSignalNotificationFactory.createPushNotificationForUser(scheduleEntry);
+        if (Objects.isNull(scheduleEntry.getCorrespondingUserOrganization()))
+            notification = oneSignalNotificationFactory.createPushNotificationForUser(scheduleEntry);
         else
-            notification =
-                oneSignalNotificationFactory.createPushNotificationForOrganization(scheduleEntry);
+            notification = oneSignalNotificationFactory.createPushNotificationForOrganization(scheduleEntry);
 
         try {
             oneSignalService.sendPushNotification(notification);

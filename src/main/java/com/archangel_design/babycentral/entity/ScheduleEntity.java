@@ -32,8 +32,11 @@ public class ScheduleEntity {
     @JoinColumn(name = "user_id")
     private UserEntity user;
 
-    @OneToMany(targetEntity = ScheduleEntryEntity.class, cascade = CascadeType.ALL)
-    @JoinColumn(name = "schedule_id")
+    @OneToMany(
+            targetEntity = ScheduleEntryEntity.class,
+            cascade = CascadeType.ALL,
+            mappedBy = "schedule"
+    )
     private List<ScheduleEntryEntity> entries = new ArrayList<>();
 
     public Long getId() {

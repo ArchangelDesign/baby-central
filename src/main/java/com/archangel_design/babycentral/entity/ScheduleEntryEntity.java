@@ -11,6 +11,7 @@ import com.archangel_design.babycentral.enums.ScheduleEntryRepeatType;
 import com.archangel_design.babycentral.enums.ScheduleEntryType;
 import com.archangel_design.babycentral.repository.GenericRepository;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -65,7 +66,7 @@ public class ScheduleEntryEntity {
     @JsonIgnore
     @ManyToOne(targetEntity = ScheduleEntity.class, optional = false)
     @JoinColumn(name = "schedule_id")
-    private ScheduleEntity owner;
+    private ScheduleEntity schedule;
 
     // LOGIKA NOTYFIKACJI
     private Instant lastNotificationDate;
@@ -80,5 +81,13 @@ public class ScheduleEntryEntity {
         this.lastNotificationDate = Instant.now();
 
         return genericRepository -> genericRepository.save(this);
+    }
+
+    public OrganizationEntity getCorrespondingUserOrganization() {
+       return getCorrespondingUser().getOrganization();
+    }
+
+    public UserEntity getCorrespondingUser() {
+        return schedule.getUser();
     }
 }
