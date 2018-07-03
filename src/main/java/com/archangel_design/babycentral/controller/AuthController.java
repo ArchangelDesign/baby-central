@@ -29,7 +29,7 @@ public class AuthController {
     @PostMapping("/login")
     public LoginResponse login(
             @RequestBody LoginRequest request
-    ) throws InvalidCredentialsException, InvalidArgumentException {
+    ) throws InvalidArgumentException {
         if (StringUtils.isNullOrEmpty(request.getDeviceId()))
             throw new InvalidArgumentException("Missing deviceId field in request.");
         SessionEntity newSession = userService.login(

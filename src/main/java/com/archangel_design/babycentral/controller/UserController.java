@@ -9,7 +9,7 @@ package com.archangel_design.babycentral.controller;
 import com.archangel_design.babycentral.entity.BabyEntity;
 import com.archangel_design.babycentral.entity.ProfileEntity;
 import com.archangel_design.babycentral.entity.UserEntity;
-import com.archangel_design.babycentral.exception.UnreachableResourceException;
+import com.archangel_design.babycentral.request.BabyCredentialsRequest;
 import com.archangel_design.babycentral.request.EmailRequest;
 import com.archangel_design.babycentral.request.LocationUpdateRequest;
 import com.archangel_design.babycentral.service.LocationService;
@@ -21,7 +21,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.List;
 
@@ -89,11 +88,12 @@ public class UserController {
     @PostMapping("/baby")
     @ApiOperation("Create a baby entity")
     public BabyEntity createBaby(
-            @RequestBody BabyEntity babyEntity
+            @RequestBody BabyCredentialsRequest babyCredentials
     ) {
         return userService.createBaby(
                 sessionService.getCurrentSession().getUser(),
-                babyEntity);
+                babyCredentials
+        );
     }
 
     @GetMapping("/baby/{babyId}")
@@ -103,11 +103,12 @@ public class UserController {
         return userService.getBaby(babyId);
     }
 
-    @PutMapping("/baby")
+    @PutMapping("/baby/{uuid}")
     public BabyEntity updateBabyInformation(
-            @RequestBody BabyEntity babyEntity
+            @PathVariable final String uuid,
+            @RequestBody final BabyCredentialsRequest babyCredentials
     ) {
-        return userService.updateBabyInformation(babyEntity);
+        return userService.updateBabyInformation(uuid, babyCredentials);
     }
 
     @DeleteMapping("/baby/{uuid}")

@@ -1,6 +1,7 @@
 package com.archangel_design.babycentral.request;
 
 public class LoginRequest {
+
     private String email;
 
     private String password;

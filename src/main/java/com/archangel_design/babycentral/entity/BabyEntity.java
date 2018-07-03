@@ -7,8 +7,8 @@
 package com.archangel_design.babycentral.entity;
 
 import com.archangel_design.babycentral.enums.Gender;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import lombok.Getter;
 
 import javax.persistence.*;
 import java.util.ArrayList;
@@ -17,8 +17,9 @@ import java.util.List;
 import java.util.UUID;
 
 @Entity
+@Getter
 @Table(name = "babies")
-@JsonIgnoreProperties(value = {"schedules"})
+@JsonIgnoreProperties(value = {"id", "avatar", "schedules"})
 public class BabyEntity {
 
     @Id
@@ -37,7 +38,6 @@ public class BabyEntity {
 
     @Lob
     @Column(columnDefinition = "mediumblob")
-    @JsonIgnore
     private byte[] avatar = new byte[0];
 
     @OneToMany(
@@ -47,26 +47,9 @@ public class BabyEntity {
     )
     private List<ScheduleEntity> schedules = new ArrayList<>();
 
-    public Long getId() {
-        return id;
-    }
-
-    public BabyEntity setId(Long id) {
-        this.id = id;
-        return this;
-    }
-
-    public String getName() {
-        return name;
-    }
-
     public BabyEntity setName(String name) {
         this.name = name;
         return this;
-    }
-
-    public Date getBirthday() {
-        return birthday;
     }
 
     public BabyEntity setBirthday(Date birthday) {
@@ -74,33 +57,12 @@ public class BabyEntity {
         return this;
     }
 
-    public Gender getGender() {
-        return gender;
-    }
-
     public BabyEntity setGender(Gender gender) {
         this.gender = gender;
         return this;
     }
 
-    public String getUuid() {
-        return uuid;
-    }
-
-    public BabyEntity setUuid(String uuid) {
-        this.uuid = uuid;
-        return this;
-    }
-
-    public byte[] getAvatar() {
-        return avatar;
-    }
-
     public void setAvatar(byte[] avatar) {
         this.avatar = avatar;
-    }
-
-    public List<ScheduleEntity> getSchedules() {
-        return schedules;
     }
 }

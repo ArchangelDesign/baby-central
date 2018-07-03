@@ -6,16 +6,12 @@
 
 package com.archangel_design.babycentral.service;
 
-import com.archangel_design.babycentral.entity.BabyEntity;
-import com.archangel_design.babycentral.entity.OrganizationEntity;
-import com.archangel_design.babycentral.entity.SessionEntity;
-import com.archangel_design.babycentral.entity.UserEntity;
-import com.archangel_design.babycentral.entity.ProfileEntity;
+import com.archangel_design.babycentral.entity.*;
 import com.archangel_design.babycentral.exception.InvalidArgumentException;
 import com.archangel_design.babycentral.exception.PersistenceLayerException;
-import com.archangel_design.babycentral.exception.UnreachableResourceException;
 import com.archangel_design.babycentral.repository.UserRepository;
-import org.apache.commons.io.IOUtils;
+import com.archangel_design.babycentral.request.BabyCredentialsRequest;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.validator.routines.EmailValidator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
@@ -26,12 +22,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import javax.servlet.http.HttpServletResponse;
-import javax.validation.constraints.NotNull;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
@@ -199,36 +190,55 @@ public class UserService {
         return userRepository.save(userEntity);
     }
 
-    public BabyEntity createBaby(final UserEntity user, final BabyEntity babyEntity) {
-        if (babyEntity.getId() != null)
-            throw new InvalidArgumentException("Baby ID provided.");
+    public BabyEntity createBaby(
+            final UserEntity user,
+            final BabyCredentialsRequest babyCredentials
+    ) {
+        BabyEntity baby = new BabyEntity();
+        baby.setName(StringUtils.capitalize(babyCredentials.getName()));
+        baby.setGender(babyCredentials.getGender());
+        baby.setBirthday(babyCredentials.getBirthday());
 
-        babyEntity.setName(
-                babyEntity.getName().substring(0, 1).toUpperCase()
-                        + babyEntity.getName().substring(1)
-        );
+        user.getBabies().add(baby);
+        userRepository.save(user);
 
+        return baby;
+        /*
         user.getBabies().forEach(b -> {
             if (b.getName().toLowerCase().equals(babyEntity.getName().toLowerCase()))
                 throw new InvalidArgumentException(
                         "You already have a baby named " + babyEntity.getName());
         });
+        */
 
-        user.getBabies().add(babyEntity);
-        UserEntity updatedUser = userRepository.save(user);
+        /*
         return updatedUser.getBabies().stream().max(Comparator.comparing(
                 BabyEntity::getId)).orElseThrow(PersistenceLayerException::new);
+        */
     }
 
     public BabyEntity getBaby(String babyId) {
         return userRepository.fetchBaby(babyId);
     }
 
-    public BabyEntity updateBabyInformation(BabyEntity babyEntity) {
-        if (babyEntity.getUuid() == null)
-            throw new InvalidArgumentException("No baby ID provided");
+    public BabyEntity updateBabyInformation(
+            final String uuid,
+            final BabyCredentialsRequest babyCredentials
+    ) {
+        BabyEntity baby = userRepository.fetchBaby(uuid);
 
-        return null;
+        if (Objects.isNull(baby)) {
+            // TODO Exception
+        }
+
+        if (Objects.nonNull(babyCredentials.getName()))
+            baby.setName(StringUtils.capitalize(babyCredentials.getName()));
+        if (Objects.nonNull(babyCredentials.getBirthday()))
+            baby.setBirthday(babyCredentials.getBirthday());
+        if (Objects.nonNull(babyCredentials.getGender()))
+            baby.setGender(babyCredentials.getGender());
+
+        return userRepository.save(baby);
     }
 
     public void removeBaby(final String uuid) {

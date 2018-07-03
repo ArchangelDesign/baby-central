@@ -147,10 +147,13 @@ public class ScheduleService {
                         LocalDate.now().get(DAY_OF_MONTH)
                 );
             case YEARLY:
-                return Objects.equals(
-                        scheduleEntryStartDate.get(DAY_OF_YEAR),
-                        LocalDate.now().get(DAY_OF_YEAR)
-                );
+                boolean validDay = Objects.equals(
+                        scheduleEntryStartDate.get(DAY_OF_MONTH),
+                        LocalDate.now().get(DAY_OF_MONTH));
+                boolean validMonth = Objects.equals(
+                        scheduleEntryStartDate.get(MONTH_OF_YEAR),
+                        LocalDate.now().get(MONTH_OF_YEAR));
+                return validDay && validMonth;
             case WORKDAYS:
                 return isWorkDay(
                         DayOfWeek.of(scheduleEntryStartDate.get(DAY_OF_WEEK))
