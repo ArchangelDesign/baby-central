@@ -10,8 +10,8 @@ spring:
         dialect: org.hibernate.dialect.MySQL5InnoDBDialect
   datasource:
     url: "jdbc:mysql://127.0.0.1:3306/babycentral?useSSL=false"
-    username: ${BABY_CENTRAL_DB_USER:root}
-    password: ${BABY_CENTRAL_DB_PASSWORD:root}
+    username: ${BABY_CENTRAL_DB_USER}
+    password: ${BABY_CENTRAL_DB_PASSWORD}
 #    driver-class-name: com.mysql.cj.jdbc.Driver
 
 server:
@@ -22,5 +22,5 @@ app:
   companyName: Archangel Design
 
 one-signal:
-  appId: ${BABY_CENTRAL_ONE_SIGNAL_APP_ID:default}
-  authorizationId: ${BABY_CENTRAL_ONE_SIGNAL_AUTH_ID:default}
+  appId: ${BABY_CENTRAL_ONE_SIGNAL_APP_ID}
+  authorizationId: ${BABY_CENTRAL_ONE_SIGNAL_AUTH_ID}

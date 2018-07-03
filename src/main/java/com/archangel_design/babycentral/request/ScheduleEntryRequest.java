@@ -15,7 +15,7 @@ import java.sql.Time;
 import java.util.Date;
 
 @Getter
-public class CreateScheduleEntryRequest {
+public class ScheduleEntryRequest {
     private String title;
     private ScheduleEntryType type;
     private Time start;

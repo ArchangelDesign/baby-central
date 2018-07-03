@@ -15,6 +15,7 @@ public class ScheduleEntryTasks {
 
     @Scheduled(fixedDelayString = "PT5S")
     public void proceessScheduleEntries() {
+        processor.resendAlertsForHighPriorityScheduleEntries();
         processor.sendNotificationsForScheduleEntries();
     }
 }

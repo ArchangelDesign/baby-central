@@ -7,8 +7,10 @@
 package com.archangel_design.babycentral.controller;
 
 import com.archangel_design.babycentral.entity.ScheduleEntity;
-import com.archangel_design.babycentral.request.CreateScheduleEntryRequest;
+import com.archangel_design.babycentral.entity.ScheduleEntryEntity;
+import com.archangel_design.babycentral.request.ScheduleEntryRequest;
 import com.archangel_design.babycentral.request.CreateScheduleRequest;
+import com.archangel_design.babycentral.request.ScheduleEntryAlertAnswerRequest;
 import com.archangel_design.babycentral.service.ScheduleService;
 import io.swagger.annotations.Api;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,7 +50,7 @@ public class ScheduleController {
     @PostMapping("/entry/{scheduleId}")
     public ScheduleEntity createEntry(
             @PathVariable String scheduleId,
-            @RequestBody CreateScheduleEntryRequest request
+            @RequestBody ScheduleEntryRequest request
     ) {
         return scheduleService.createEntry(
                 scheduleId,
@@ -82,5 +84,27 @@ public class ScheduleController {
             @PathVariable String uuid
     ) {
         scheduleService.removeScheduleEntryEntity(uuid);
+    }
+
+    @PostMapping("/entry/{uuid}/alert-answer")
+    public void recordAnswerForScheduleEntryAlert(
+            @PathVariable final String uuid,
+            @RequestBody final ScheduleEntryAlertAnswerRequest request
+    ) {
+        scheduleService.recordAnswerForScheduleEntryAlert(
+                uuid,
+                request.getUserUuid()
+        );
+    }
+
+    @PutMapping("/entry/{uuid}")
+    public ScheduleEntryEntity updateScheduleEntryEntity(
+            @PathVariable final String uuid,
+            @RequestBody final ScheduleEntryRequest scheduleEntryRequest
+    ) {
+        return scheduleService.updateScheduleEntryEntity(
+                uuid,
+                scheduleEntryRequest
+        );
     }
 }

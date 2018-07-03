@@ -7,13 +7,18 @@
 package com.archangel_design.babycentral.entity;
 
 import com.archangel_design.babycentral.enums.Gender;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import javax.persistence.*;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.UUID;
 
 @Entity
 @Table(name = "babies")
+@JsonIgnoreProperties(value = {"schedules"})
 public class BabyEntity {
 
     @Id
@@ -32,7 +37,15 @@ public class BabyEntity {
 
     @Lob
     @Column(columnDefinition = "mediumblob")
+    @JsonIgnore
     private byte[] avatar = new byte[0];
+
+    @OneToMany(
+            targetEntity = ScheduleEntity.class,
+            cascade = CascadeType.ALL,
+            mappedBy = "baby"
+    )
+    private List<ScheduleEntity> schedules = new ArrayList<>();
 
     public Long getId() {
         return id;
@@ -85,5 +98,9 @@ public class BabyEntity {
 
     public void setAvatar(byte[] avatar) {
         this.avatar = avatar;
+    }
+
+    public List<ScheduleEntity> getSchedules() {
+        return schedules;
     }
 }

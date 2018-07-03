@@ -9,24 +9,18 @@ package com.archangel_design.babycentral.controller;
 import com.archangel_design.babycentral.entity.BabyEntity;
 import com.archangel_design.babycentral.entity.ProfileEntity;
 import com.archangel_design.babycentral.entity.UserEntity;
+import com.archangel_design.babycentral.exception.UnreachableResourceException;
 import com.archangel_design.babycentral.request.LocationUpdateRequest;
 import com.archangel_design.babycentral.service.LocationService;
 import com.archangel_design.babycentral.service.SessionService;
 import com.archangel_design.babycentral.service.UserService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.List;
 
@@ -38,14 +32,21 @@ import java.util.List;
 @Api(tags = "User operations")
 public class UserController {
 
-    @Autowired
-    UserService userService;
+    private final UserService userService;
 
-    @Autowired
-    LocationService locationService;
+    private final LocationService locationService;
 
-    @Autowired
-    SessionService sessionService;
+    private final SessionService sessionService;
+
+    public UserController(
+            final UserService userService,
+            final LocationService locationService,
+            final SessionService sessionService
+    ) {
+        this.userService = userService;
+        this.locationService = locationService;
+        this.sessionService = sessionService;
+    }
 
     @GetMapping("/my-account")
     public UserEntity myAccount() {
@@ -55,7 +56,7 @@ public class UserController {
     @PostMapping("/update-profile")
     public UserEntity updateProfile(
             @RequestBody ProfileEntity request
-            ) {
+    ) {
         return userService.updateProfile(request);
     }
 
@@ -69,7 +70,7 @@ public class UserController {
     @PostMapping("/update-location")
     public void reportLocation(
             @RequestBody LocationUpdateRequest request
-            ) {
+    ) {
         locationService.reportPosition(
                 request.getLat(),
                 request.getLon(),
@@ -110,10 +111,13 @@ public class UserController {
         return userService.updateBabyInformation(babyEntity);
     }
 
+    @DeleteMapping("/baby/{uuid}")
+    public void removeBaby(@PathVariable final String uuid) {
+        userService.removeBaby(uuid);
+    }
+
     @PostMapping("/invite")
-    public Boolean inviteUser(
-            @RequestBody String email
-    ) {
+    public Boolean inviteUser(@RequestBody String email) {
         return userService.inviteToOrganization(email);
     }
 
@@ -123,12 +127,18 @@ public class UserController {
     }
 
     @GetMapping("/avatar/{uuid}")
-    public ResponseEntity<byte[]> getUserAvatar(@PathVariable final String uuid) {
-        return userService.getUserAvatar(uuid);
+    public void getUserAvatar(
+            @PathVariable final String uuid,
+            final HttpServletResponse response
+    ) throws UnreachableResourceException {
+        userService.getUserAvatar(uuid, response);
     }
 
     @PostMapping("/avatar/{uuid}")
-    public UserEntity setUserAvatar(@PathVariable final String uuid, @RequestParam("file") MultipartFile file) throws IOException {
+    public UserEntity setUserAvatar(
+            @PathVariable final String uuid,
+            @RequestParam("file") MultipartFile file
+    ) throws IOException {
         return userService.setUserAvatar(uuid, file);
     }
 
@@ -138,7 +148,10 @@ public class UserController {
     }
 
     @PostMapping("baby/avatar/{uuid}")
-    public BabyEntity setBabyAvatar(@PathVariable final String uuid, @RequestParam("file") MultipartFile file) throws IOException {
+    public BabyEntity setBabyAvatar(
+            @PathVariable final String uuid,
+            @RequestParam("file") MultipartFile file
+    ) throws IOException {
         return userService.setBabyAvatar(uuid, file);
     }
 }

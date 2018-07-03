@@ -9,6 +9,7 @@ package com.archangel_design.babycentral.repository;
 import com.archangel_design.babycentral.entity.ScheduleEntity;
 import com.archangel_design.babycentral.entity.ScheduleEntryEntity;
 import com.archangel_design.babycentral.entity.UserEntity;
+import com.archangel_design.babycentral.enums.ScheduleEntryPriority;
 import org.springframework.stereotype.Repository;
 
 import javax.persistence.TemporalType;
@@ -67,13 +68,14 @@ public class ScheduleRepository extends GenericRepository {
         return query.getResultList();
     }
 
-    public List<ScheduleEntryEntity> fetchPrefiltredScheduleEntriesToTrigger() {
-        Instant d1 = Instant.now().minus(Duration.ofMinutes(2));
-        Instant d2 = Instant.now().plus(Duration.ofMinutes(2));
+    // TODO NAZWA
+    public List<ScheduleEntryEntity> fetchPrefiltredScheduleEntriesForNotificationSending() {
+        Instant d1 = Instant.now().minus(Duration.ofMinutes(20));
+        Instant d2 = Instant.now().plus(Duration.ofMinutes(20));
 
         TypedQuery<ScheduleEntryEntity> query = em.createQuery(
                 "select s from ScheduleEntryEntity s " +
-                        "where s.deleted = false " +
+                        "where s.isHighPriorityAlertActive = false " +
                         "and DATE(SYSDATE()) between DATE(s.startDate) and DATE(s.endDate) " +
                         "and s.start between :d1 and :d2 " +
                         "and (s.lastNotificationDate is null or DATE(s.lastNotificationDate) < DATE(SYSDATE()))",
@@ -82,6 +84,25 @@ public class ScheduleRepository extends GenericRepository {
 
         query.setParameter("d1", Date.from(d1), TemporalType.TIME);
         query.setParameter("d2", Date.from(d2), TemporalType.TIME);
+
+        return query.getResultList();
+    }
+
+    // TODO NAZWA
+    public List<ScheduleEntryEntity> fetchScheduleEntriesForAlertResending() {
+        TypedQuery<ScheduleEntryEntity> query = em.createQuery(
+                "select s from ScheduleEntryEntity s " +
+                        "where s.isHighPriorityAlertActive = true " +
+                        "and s.priority = :priority " +
+                        "and (" +
+                            "select count(a.id) from HighPriorityAlertResponseEntity a " +
+                            "where a.scheduleEntry.uuid = s.uuid " +
+                            "and s.lastNotificationDate < a.responseDate " +
+                        ") = 0",
+                ScheduleEntryEntity.class
+        );
+
+        query.setParameter("priority", ScheduleEntryPriority.HIGH);
 
         return query.getResultList();
     }

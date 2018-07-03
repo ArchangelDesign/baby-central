@@ -13,6 +13,7 @@ import com.archangel_design.babycentral.enums.ScheduleEntryType;
 import com.archangel_design.babycentral.exception.InvalidArgumentException;
 import com.archangel_design.babycentral.repository.ScheduleRepository;
 import com.archangel_design.babycentral.repository.UserRepository;
+import com.archangel_design.babycentral.request.ScheduleEntryRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -21,6 +22,8 @@ import java.sql.Time;
 import java.time.DayOfWeek;
 import java.time.Instant;
 import static java.time.temporal.ChronoField.*;
+
+import java.time.LocalDate;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
@@ -69,21 +72,23 @@ public class ScheduleService {
             final Date dateStart,
             final Date dateStop,
             final String title
-            ) {
+    ) {
         ScheduleEntity scheduleEntity = scheduleRepository.fetch(scheduleId);
         if (scheduleEntity == null)
             throw new InvalidArgumentException("Schedule does not exist. " + scheduleId);
+
         ScheduleEntryEntity entry = new ScheduleEntryEntity();
         entry.setPriority(priority);
-                entry.setStart(start);
-                entry.setType(entryType);
-                entry.setStop(stop);
-                entry.setRepeatType(repeatType);
-                entry.setStartDate(dateStart);
-                entry.setEndDate(dateStop);
-                entry.setTitle(title);
+        entry.setStart(start);
+        entry.setType(entryType);
+        entry.setStop(stop);
+        entry.setRepeatType(repeatType);
+        entry.setStartDate(dateStart);
+        entry.setEndDate(dateStop);
+        entry.setTitle(title);
+        entry.setSchedule(scheduleEntity);
+
         scheduleEntity.getEntries().add(entry);
-        entry.setOwner(scheduleEntity);
 
         return scheduleRepository.save(scheduleEntity);
     }
@@ -103,10 +108,14 @@ public class ScheduleService {
         return scheduleRepository.fetchList(user, uuid);
     }
 
+    // TODO NAZWA
+    public List<ScheduleEntryEntity> getHighPriorityEventsForAlertsResending() {
+        return scheduleRepository.fetchScheduleEntriesForAlertResending();
+    }
 
     // TODO NAZWA
     public List<ScheduleEntryEntity> getEventsForNotificationSending() {
-        return scheduleRepository.fetchPrefiltredScheduleEntriesToTrigger()
+        return scheduleRepository.fetchPrefiltredScheduleEntriesForNotificationSending()
                 .stream()
                 .filter(this::isValidForSend)
                 .collect(Collectors.toList());
@@ -114,21 +123,38 @@ public class ScheduleService {
 
     // TODO split to methods? NAZWA METODY
     private boolean isValidForSend(ScheduleEntryEntity prefiltredScheduleEntry) {
-        Instant scheduleEntryStartDate = prefiltredScheduleEntry.getStartDate().toInstant();
+        Instant startDateAsInstant = prefiltredScheduleEntry.getStartDate().toInstant();
+        // TODO /60/60/24? :O
+        LocalDate scheduleEntryStartDate = LocalDate.ofEpochDay(
+                startDateAsInstant.getEpochSecond()/60/60/24
+        );
 
         switch(prefiltredScheduleEntry.getRepeatType()) {
             case SINGLE:
-                return Objects.isNull(prefiltredScheduleEntry.getLastNotificationDate());
+                return Objects.isNull(
+                        prefiltredScheduleEntry.getLastNotificationDate()
+                );
             case DAILY:
                 return true;
             case WEEKLY:
-                return Objects.equals(scheduleEntryStartDate.get(DAY_OF_WEEK), Instant.now().get(DAY_OF_WEEK));
+                return Objects.equals(
+                        scheduleEntryStartDate.get(DAY_OF_WEEK),
+                        LocalDate.now().get(DAY_OF_WEEK)
+                );
             case MONTHLY:
-                return Objects.equals(scheduleEntryStartDate.get(DAY_OF_MONTH), Instant.now().get(DAY_OF_MONTH));
+                return Objects.equals(
+                        scheduleEntryStartDate.get(DAY_OF_MONTH),
+                        LocalDate.now().get(DAY_OF_MONTH)
+                );
             case YEARLY:
-                return Objects.equals(scheduleEntryStartDate.get(DAY_OF_YEAR), Instant.now().get(DAY_OF_YEAR));
+                return Objects.equals(
+                        scheduleEntryStartDate.get(DAY_OF_YEAR),
+                        LocalDate.now().get(DAY_OF_YEAR)
+                );
             case WORKDAYS:
-                return isWorkDay(DayOfWeek.of(scheduleEntryStartDate.get(DAY_OF_WEEK)));
+                return isWorkDay(
+                        DayOfWeek.of(scheduleEntryStartDate.get(DAY_OF_WEEK))
+                );
         }
 
         // LOGGER nieobsługiwany event
@@ -138,6 +164,23 @@ public class ScheduleService {
     // TODO tutaj?
     private boolean isWorkDay(DayOfWeek dayOfWeek) {
         return dayOfWeek != DayOfWeek.SATURDAY && dayOfWeek != DayOfWeek.SUNDAY;
+    }
+
+    public void recordAnswerForScheduleEntryAlert(
+            final String scheduleEntryUuid,
+            final String userUuid
+    ) {
+        ScheduleEntryEntity scheduleEntry = scheduleRepository.fetchEntry(scheduleEntryUuid);
+        if (Objects.isNull(scheduleEntry)) {
+            // TODO Exception
+        }
+
+        UserEntity user = userRepository.fetchByUuid(userUuid);
+        if (Objects.isNull(user)) {
+            // TODO Exception
+        }
+
+        scheduleRepository.save(new HighPriorityAlertResponseEntity(scheduleEntry, user));
     }
 
     public void removeScheduleEntryEntity(String uuid) {
@@ -156,5 +199,39 @@ public class ScheduleService {
             throw new InvalidArgumentException("scheduleEntity does not exist.");
 
         scheduleRepository.delete(scheduleEntity);
+    }
+
+    public ScheduleEntryEntity updateScheduleEntryEntity(
+            final String uuid,
+            final ScheduleEntryRequest updateRequest
+    ) {
+        ScheduleEntryEntity scheduleEntry = scheduleRepository.fetchEntry(uuid);
+
+        if (Objects.isNull(scheduleEntry)) {
+            // TODO Exception
+        }
+
+        if (Objects.nonNull(scheduleEntry.getLastNotificationDate())) {
+            // TODO Exception
+        }
+
+        if (Objects.nonNull(updateRequest.getTitle()))
+            scheduleEntry.setTitle(updateRequest.getTitle());
+        if (Objects.nonNull(updateRequest.getType()))
+            scheduleEntry.setType(updateRequest.getType());
+        if (Objects.nonNull(updateRequest.getStart()))
+            scheduleEntry.setStart(updateRequest.getStart());
+        if (Objects.nonNull(updateRequest.getStop()))
+            scheduleEntry.setStop(updateRequest.getStop());
+        if (Objects.nonNull(updateRequest.getPriority()))
+            scheduleEntry.setPriority(updateRequest.getPriority());
+        if (Objects.nonNull(updateRequest.getRepeatType()))
+            scheduleEntry.setRepeatType(updateRequest.getRepeatType());
+        if (Objects.nonNull(updateRequest.getStartDate()))
+            scheduleEntry.setStartDate(updateRequest.getStartDate());
+        if (Objects.nonNull(updateRequest.getEndDate()))
+            scheduleEntry.setEndDate(updateRequest.getEndDate());
+
+        return scheduleRepository.save(scheduleEntry);
     }
 }

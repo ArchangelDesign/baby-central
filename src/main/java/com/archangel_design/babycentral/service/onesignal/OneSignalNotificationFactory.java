@@ -21,7 +21,9 @@ public class OneSignalNotificationFactory {
         OneSignalPushNotification notification =
                 OneSignalPushNotification.createNotificationForOrganization(
                         oneSignalConfiguration.getAppId(),
-                        scheduleEntry.getOwner().getUser().getOrganization().getUuid()
+                        scheduleEntry.getCorrespondingUserOrganization().getUuid(),
+                        scheduleEntry.getPriority(),
+                        scheduleEntry.getUuid()
                 );
 
         // TODO logika treści wiadomości
@@ -34,7 +36,9 @@ public class OneSignalNotificationFactory {
         OneSignalPushNotification notification =
                 OneSignalPushNotification.createNotificationForUser(
                         oneSignalConfiguration.getAppId(),
-                        scheduleEntry.getOwner().getUser().getUuid()
+                        scheduleEntry.getCorrespondingUser().getUuid(),
+                        scheduleEntry.getPriority(),
+                        scheduleEntry.getUuid()
                 );
 
         // TODO logika treści wiadomości
