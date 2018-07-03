@@ -24,7 +24,6 @@ import java.util.function.Function;
 @Entity
 @Table(name = "schedule_entries")
 @Getter
-@Setter
 public class ScheduleEntryEntity {
 
     @Id
@@ -34,39 +33,52 @@ public class ScheduleEntryEntity {
     @Column(length = 36)
     private String uuid = UUID.randomUUID().toString();
 
+    @Setter
     @Column(length = 120)
     private String title;
 
+    @Setter
     @Enumerated(value = EnumType.STRING)
     private ScheduleEntryType type;
 
+    @Setter
     private Time start;
 
+    @Setter
     private Time stop;
 
+    @Setter
     @Enumerated(EnumType.STRING)
     private ScheduleEntryPriority priority;
 
+    @Setter
     @Enumerated(EnumType.STRING)
     private ScheduleEntryRepeatType repeatType;
 
+    @Setter
     private Date startDate;
 
+    @Setter
     private Date endDate;
 
+    @Setter
     @JsonIgnore
     @ManyToOne(targetEntity = ScheduleEntity.class, optional = false)
     @JoinColumn(name = "schedule_id")
     private ScheduleEntity owner;
 
+    // LOGIKA NOTYFIKACJI
     private Instant lastNotificationDate;
+    ///
+
+    // LOGIKA HIGH PRIOTITY ALERTÓW
+    @Setter
+    private boolean isHighPriorityAlertActive = false;
+    ///
 
     public Function<GenericRepository, ScheduleEntryEntity> recordNotificationSend() {
         this.lastNotificationDate = Instant.now();
 
         return genericRepository -> genericRepository.save(this);
     }
-
-    // LOGIKA HIGH PRIOTITY ALERTÓW
-    private boolean isHighPriorityAlertActive = false;
 }

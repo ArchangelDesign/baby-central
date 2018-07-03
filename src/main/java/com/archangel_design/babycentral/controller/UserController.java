@@ -27,7 +27,9 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.List;
 
 /**
@@ -55,7 +57,7 @@ public class UserController {
     @PostMapping("/update-profile")
     public UserEntity updateProfile(
             @RequestBody ProfileEntity request
-            ) {
+    ) {
         return userService.updateProfile(request);
     }
 
@@ -69,7 +71,7 @@ public class UserController {
     @PostMapping("/update-location")
     public void reportLocation(
             @RequestBody LocationUpdateRequest request
-            ) {
+    ) {
         locationService.reportPosition(
                 request.getLat(),
                 request.getLon(),
@@ -123,12 +125,18 @@ public class UserController {
     }
 
     @GetMapping("/avatar/{uuid}")
-    public ResponseEntity<byte[]> getUserAvatar(@PathVariable final String uuid) {
-        return userService.getUserAvatar(uuid);
+    public void getUserAvatar(
+            @PathVariable final String uuid,
+            final HttpServletResponse response
+    ) throws IOException {
+        userService.getUserAvatar(uuid, response);
     }
 
     @PostMapping("/avatar/{uuid}")
-    public UserEntity setUserAvatar(@PathVariable final String uuid, @RequestParam("file") MultipartFile file) throws IOException {
+    public UserEntity setUserAvatar(
+            @PathVariable final String uuid,
+            @RequestParam("file") MultipartFile file
+    ) throws IOException {
         return userService.setUserAvatar(uuid, file);
     }
 
@@ -138,7 +146,10 @@ public class UserController {
     }
 
     @PostMapping("baby/avatar/{uuid}")
-    public BabyEntity setBabyAvatar(@PathVariable final String uuid, @RequestParam("file") MultipartFile file) throws IOException {
+    public BabyEntity setBabyAvatar(
+            @PathVariable final String uuid,
+            @RequestParam("file") MultipartFile file
+    ) throws IOException {
         return userService.setBabyAvatar(uuid, file);
     }
 }

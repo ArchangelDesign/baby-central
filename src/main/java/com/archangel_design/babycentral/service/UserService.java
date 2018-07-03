@@ -14,6 +14,7 @@ import com.archangel_design.babycentral.entity.ProfileEntity;
 import com.archangel_design.babycentral.exception.InvalidArgumentException;
 import com.archangel_design.babycentral.exception.PersistenceLayerException;
 import com.archangel_design.babycentral.repository.UserRepository;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.validator.routines.EmailValidator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
@@ -24,8 +25,12 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import javax.servlet.http.HttpServletResponse;
 import javax.validation.constraints.NotNull;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
@@ -295,17 +300,21 @@ public class UserService {
         return userRepository.fetchByUuid(userUuid);
     }
 
-    public ResponseEntity getUserAvatar(String uuid) {
+    public void getUserAvatar(
+            final String uuid,
+            final HttpServletResponse response
+    ) throws IOException { // TODO IOException? Zastąpić na własny
         UserEntity user = userRepository.fetchByUuid(uuid);
 
         if (user == null)
             throw new InvalidArgumentException("Invalid uuid.");
 
-        final HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.IMAGE_JPEG);
+        byte[] avatarData = user.getAvatar();
 
-        return new ResponseEntity<byte[]>(user.getAvatar(), headers,
-                HttpStatus.OK);
+        InputStream inputStream = new ByteArrayInputStream(avatarData);
+        OutputStream outputStream = response.getOutputStream();
+        IOUtils.copy(inputStream, outputStream);
+        response.flushBuffer();
     }
 
     public UserEntity setUserAvatar(String uuid, MultipartFile file) throws IOException {
