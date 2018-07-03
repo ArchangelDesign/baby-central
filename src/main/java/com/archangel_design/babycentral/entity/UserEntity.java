@@ -38,11 +38,13 @@ public class UserEntity {
     @JoinColumn(name = "parent_id")
     private List<BabyEntity> babies = new ArrayList<>();
 
-    @ManyToOne(targetEntity = OrganizationEntity.class,
+    @ManyToOne(
+            targetEntity = OrganizationEntity.class,
             cascade = {
                     CascadeType.PERSIST,
                     CascadeType.MERGE,
-                    CascadeType.REFRESH})
+                    CascadeType.REFRESH
+            })
     @JoinColumn(name = "organization_id")
     private OrganizationEntity organization;
 

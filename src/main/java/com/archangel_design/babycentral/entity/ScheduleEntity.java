@@ -24,7 +24,10 @@ public class ScheduleEntity {
     @Column(length = 36)
     private String uuid = UUID.randomUUID().toString();
 
-    @ManyToOne(targetEntity = BabyEntity.class, optional = false)
+    @ManyToOne(
+            targetEntity = BabyEntity.class,
+            optional = false
+    )
     @JoinColumn(name = "baby_id")
     private BabyEntity baby;
 

@@ -35,6 +35,7 @@ import java.io.OutputStream;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 
 import static com.mysql.jdbc.StringUtils.isNullOrEmpty;
 
@@ -228,6 +229,15 @@ public class UserService {
             throw new InvalidArgumentException("No baby ID provided");
 
         return null;
+    }
+
+    public void removeBaby(final String uuid) {
+        BabyEntity baby = userRepository.fetchBaby(uuid);
+
+        if (Objects.isNull(baby))
+            throw new InvalidArgumentException("Baby does not exist.");
+
+        userRepository.delete(baby);
     }
 
     /**

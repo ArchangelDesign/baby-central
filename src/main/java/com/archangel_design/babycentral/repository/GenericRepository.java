@@ -86,4 +86,9 @@ public abstract class GenericRepository {
     public void delete(ScheduleEntryEntity scheduleEntryEntity) {
         em.remove(scheduleEntryEntity);
     }
+
+    @Transactional()
+    public void delete(BabyEntity baby) {
+        em.remove(baby);
+    }
 }
