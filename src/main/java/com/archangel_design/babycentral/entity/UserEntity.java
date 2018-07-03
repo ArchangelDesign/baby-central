@@ -1,7 +1,11 @@
 package com.archangel_design.babycentral.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
+import lombok.Setter;
+import lombok.experimental.Accessors;
 
 import javax.persistence.*;
 import java.util.ArrayList;
@@ -11,15 +15,19 @@ import java.util.UUID;
 
 @Entity
 @Getter
+@Setter
+@Accessors(chain = true)
 @Table(name = "users")
 @JsonIgnoreProperties(value = {"id", "deleted", "password", "avatar"})
 public class UserEntity {
 
     @Id
     @GeneratedValue
+    @Setter(AccessLevel.NONE)
     private Long id;
 
     @Column(length = 36)
+    @Setter(AccessLevel.NONE)
     private String uuid = UUID.randomUUID().toString();
 
     @Column(length = 150)
@@ -57,61 +65,4 @@ public class UserEntity {
     @Lob
     @Column(columnDefinition = "mediumblob")
     private byte[] avatar = new byte[0];
-
-    public UserEntity setId(Long id) {
-        this.id = id;
-        return this;
-    }
-
-    public UserEntity setUuid(String uuid) {
-        this.uuid = uuid;
-        return this;
-    }
-
-    public UserEntity setEmail(String email) {
-        this.email = email;
-        return this;
-    }
-
-    public UserEntity setPassword(String password) {
-        this.password = password;
-        return this;
-    }
-
-    public UserEntity setRegistration(Date registration) {
-        this.registration = registration;
-        return this;
-    }
-
-    public UserEntity setLastUsage(Date lastUsage) {
-        this.lastUsage = lastUsage;
-        return this;
-    }
-
-    public List<BabyEntity> getBabies() {
-        return babies;
-    }
-
-    public OrganizationEntity getOrganization() {
-        return organization;
-    }
-
-    public UserEntity setOrganization(OrganizationEntity organization) {
-        this.organization = organization;
-        return this;
-    }
-
-    public UserEntity setProfile(ProfileEntity profile) {
-        this.profile = profile;
-        return this;
-    }
-
-    public UserEntity setInvitationPending(Boolean invitationPending) {
-        this.invitationPending = invitationPending;
-        return this;
-    }
-
-    public void setAvatar(byte[] avatar) {
-        this.avatar = avatar;
-    }
 }

@@ -194,10 +194,10 @@ public class UserService {
             final UserEntity user,
             final BabyCredentialsRequest babyCredentials
     ) {
-        BabyEntity baby = new BabyEntity();
-        baby.setName(StringUtils.capitalize(babyCredentials.getName()));
-        baby.setGender(babyCredentials.getGender());
-        baby.setBirthday(babyCredentials.getBirthday());
+        BabyEntity baby = new BabyEntity()
+                .setName(StringUtils.capitalize(babyCredentials.getName()))
+                .setGender(babyCredentials.getGender())
+                .setBirthday(babyCredentials.getBirthday());
 
         user.getBabies().add(baby);
         userRepository.save(user);
@@ -321,7 +321,7 @@ public class UserService {
         return userRepository.fetchByUuid(userUuid);
     }
 
-    public ResponseEntity getUserAvatar(String uuid) {
+    public ResponseEntity<byte[]> getUserAvatar(String uuid) {
         UserEntity user = userRepository.fetchByUuid(uuid);
 
         if (user == null)
@@ -355,7 +355,7 @@ public class UserService {
         final HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.IMAGE_JPEG);
 
-        return new ResponseEntity<byte[]>(baby.getAvatar(), headers,
+        return new ResponseEntity<>(baby.getAvatar(), headers,
                 HttpStatus.OK);
     }
 
