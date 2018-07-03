@@ -311,26 +311,16 @@ public class UserService {
         return userRepository.fetchByUuid(userUuid);
     }
 
-    public void getUserAvatar(
-            final String uuid,
-            final HttpServletResponse response
-    ) throws UnreachableResourceException {
+    public ResponseEntity getUserAvatar(String uuid) {
         UserEntity user = userRepository.fetchByUuid(uuid);
 
         if (user == null)
             throw new InvalidArgumentException("Invalid uuid.");
 
-        byte[] avatarData = user.getAvatar();
+        final HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.IMAGE_JPEG);
 
-        InputStream inputStream = new ByteArrayInputStream(avatarData);
-        try {
-            OutputStream outputStream = response.getOutputStream();
-            IOUtils.copy(inputStream, outputStream);
-            response.flushBuffer();
-        } catch (IOException exception) {
-            // TODO message
-            throw new UnreachableResourceException("");
-        }
+        return new ResponseEntity<>(user.getAvatar(), headers, HttpStatus.OK);
     }
 
     public UserEntity setUserAvatar(String uuid, MultipartFile file) throws IOException {

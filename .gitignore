@@ -28,3 +28,6 @@
 
 ### application.yml ###
 /src/main/resources/application.yml
+
+### run-container ###
+run-container.bash

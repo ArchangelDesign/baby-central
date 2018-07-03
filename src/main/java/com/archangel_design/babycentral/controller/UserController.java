@@ -10,6 +10,7 @@ import com.archangel_design.babycentral.entity.BabyEntity;
 import com.archangel_design.babycentral.entity.ProfileEntity;
 import com.archangel_design.babycentral.entity.UserEntity;
 import com.archangel_design.babycentral.exception.UnreachableResourceException;
+import com.archangel_design.babycentral.request.EmailRequest;
 import com.archangel_design.babycentral.request.LocationUpdateRequest;
 import com.archangel_design.babycentral.service.LocationService;
 import com.archangel_design.babycentral.service.SessionService;
@@ -115,8 +116,8 @@ public class UserController {
     }
 
     @PostMapping("/invite")
-    public Boolean inviteUser(@RequestBody String email) {
-        return userService.inviteToOrganization(email);
+    public Boolean inviteUser(@RequestBody final EmailRequest email) {
+        return userService.inviteToOrganization(email.getEmail());
     }
 
     @GetMapping("/organization")
@@ -125,11 +126,8 @@ public class UserController {
     }
 
     @GetMapping("/avatar/{uuid}")
-    public void getUserAvatar(
-            @PathVariable final String uuid,
-            final HttpServletResponse response
-    ) throws UnreachableResourceException {
-        userService.getUserAvatar(uuid, response);
+    public ResponseEntity<byte[]> getUserAvatar(@PathVariable final String uuid) {
+        return userService.getUserAvatar(uuid);
     }
 
     @PostMapping("/avatar/{uuid}")
