@@ -124,7 +124,7 @@ public class UserRepository extends GenericRepository {
         return query.getResultList();
     }
 
-    public UserEntity fetchByUuid(String userUuid) {
+    public UserEntity fetchByUuid(final String userUuid) {
         TypedQuery<UserEntity> query = em.createQuery(
                 "select u from UserEntity u "
                         + "where u.uuid = :userUuid ",

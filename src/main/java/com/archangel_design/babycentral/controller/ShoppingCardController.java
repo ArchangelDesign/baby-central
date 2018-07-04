@@ -2,30 +2,58 @@ package com.archangel_design.babycentral.controller;
 
 import com.archangel_design.babycentral.entity.ShoppingCardEntity;
 import com.archangel_design.babycentral.entity.ShoppingCardEntryEntity;
+import com.archangel_design.babycentral.entity.UserEntity;
 import com.archangel_design.babycentral.request.CreateShoppingCardEntryRequest;
 import com.archangel_design.babycentral.request.CreateShoppingCardRequest;
 import com.archangel_design.babycentral.request.SetPurchasedRequest;
 import com.archangel_design.babycentral.service.ShoppingCardService;
+import com.archangel_design.babycentral.service.UserService;
 import io.swagger.annotations.Api;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/shopping-card")
 @Api(tags = "Shopping card management")
 public class ShoppingCardController {
 
-    @Autowired
-    ShoppingCardService shoppingCardService;
+    private final ShoppingCardService shoppingCardService;
+    private final UserService userService;
+
+    public ShoppingCardController(
+            final ShoppingCardService shoppingCardService,
+            final UserService userService
+    ) {
+        this.shoppingCardService = shoppingCardService;
+        this.userService = userService;
+    }
+
+    @PostMapping("/assign/{uuid}")
+    public ShoppingCardEntity assignShoppingCardToUsers(
+            @PathVariable final String shoppingCardUuid,
+            @RequestBody final List<String> userUuids
+    ) {
+        List<UserEntity> users = userUuids.stream()
+                .map(userService::getUser)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
+
+        return shoppingCardService.assignShoppingCardToUsers(
+                shoppingCardUuid,
+                users
+        );
+    }
 
     @PostMapping("/create-shopping-card")
     public ShoppingCardEntity addShoppingCard(
             @RequestBody CreateShoppingCardRequest request
     ) {
-        return shoppingCardService.createShoppingCard(
-                request.getName(), request.getDescription()
+        return shoppingCardService.createShoppingCardForCurrentUser(
+                request.getName(),
+                request.getDescription()
         );
     }
 
@@ -59,14 +87,6 @@ public class ShoppingCardController {
             @RequestBody SetPurchasedRequest setPurchasedRequest
     ) {
         return shoppingCardService.setPurchased(uuid, setPurchasedRequest.isPurchased());
-    }
-
-    @PostMapping("/assign/{uuid}")
-    public ShoppingCardEntity assignShoppingCard(
-            @PathVariable String uuid,
-            @RequestBody List<String> users
-    ) {
-        return shoppingCardService.assignShoppingCard(uuid, users);
     }
 
     @GetMapping("/set-status-to-draft/{uuid}")

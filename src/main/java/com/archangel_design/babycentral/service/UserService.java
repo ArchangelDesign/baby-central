@@ -13,7 +13,6 @@ import com.archangel_design.babycentral.repository.UserRepository;
 import com.archangel_design.babycentral.request.BabyCredentialsRequest;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.validator.routines.EmailValidator;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -36,17 +35,26 @@ public class UserService {
     /**
      * Used to manipulate current session.
      */
-    @Autowired
-    private SessionService sessionService;
+    private final SessionService sessionService;
 
     /**
      * Used to access persistence layer.
      */
-    @Autowired
-    private UserRepository userRepository;
+    private final UserRepository userRepository;
+    private final EmailService emailService;
+    private final ShoppingCardService shoppingCardService;
 
-    @Autowired
-    EmailService emailService;
+    public UserService(
+            final SessionService sessionService,
+            final UserRepository userRepository,
+            final EmailService emailService,
+            final ShoppingCardService shoppingCardService
+    ) {
+        this.sessionService = sessionService;
+        this.userRepository = userRepository;
+        this.emailService = emailService;
+        this.shoppingCardService = shoppingCardService;
+    }
 
     /**
      * Compares plain text password with given hash.
@@ -122,10 +130,13 @@ public class UserService {
             throw new InvalidArgumentException("Passwords do not match.");
         }
 
-        if (userRepository.userExists(email))
-            return completeUserRegistration(email, password);
-        else
-            return registerNewUser(email, password);
+        UserEntity user = userRepository.userExists(email) ?
+                completeUserRegistration(email, password) :
+                registerNewUser(email, password);
+
+        shoppingCardService.addSampleShoppingCardsToUser(user);
+
+        return user;
     }
 
     private UserEntity completeUserRegistration(
@@ -133,10 +144,9 @@ public class UserService {
             final String password
     ) {
         UserEntity user = userRepository.getUserWithPendingInvitation(email);
+
         if (Objects.isNull(user))
-            throw new InvalidArgumentException(String.format(
-                "There is no pending invitation for user with email %s.", email
-            ));
+            throw new InvalidArgumentException(String.format("There is no pending invitation for user with email %s.", email));
 
         user.setLastUsage(Instant.now())
             .setPassword(hashPassword(password))

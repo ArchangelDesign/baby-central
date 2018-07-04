@@ -9,8 +9,8 @@ import lombok.experimental.Accessors;
 import org.hibernate.annotations.CreationTimestamp;
 
 import javax.persistence.*;
+import java.time.Instant;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
@@ -39,7 +39,8 @@ public class ShoppingCardEntity {
 
     @Column(updatable = false)
     @CreationTimestamp
-    private Date creationDate;
+    @Setter(AccessLevel.NONE)
+    private Instant creationDate = Instant.now();
 
     @Enumerated(value = EnumType.STRING)
     private ShoppingCardStatus status = ShoppingCardStatus.DRAFT;

@@ -3,12 +3,14 @@ package com.archangel_design.babycentral.entity;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.experimental.Accessors;
 import org.hibernate.annotations.CreationTimestamp;
 
 import javax.persistence.*;
 import java.util.Date;
 import java.util.UUID;
 
+@Accessors(chain = true)
 @Entity
 @Getter
 @JsonIgnoreProperties(value = {"id"})
