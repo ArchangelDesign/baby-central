@@ -178,10 +178,10 @@ public class ScheduleService {
             // TODO Exception
         }
 
-        UserEntity user = userRepository.fetchByUuid(userUuid);
-        if (Objects.isNull(user)) {
-            // TODO Exception
-        }
+        // TODO Exception
+        UserEntity user = userRepository
+                .fetchByUuid(userUuid)
+                .orElseThrow(() -> new InvalidArgumentException(""));
 
         scheduleRepository.save(new HighPriorityAlertResponseEntity(scheduleEntry, user));
     }

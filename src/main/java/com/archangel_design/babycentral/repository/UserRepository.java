@@ -12,6 +12,7 @@ import com.archangel_design.babycentral.entity.UserEntity;
 import org.springframework.stereotype.Repository;
 import javax.persistence.TypedQuery;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public class UserRepository extends GenericRepository {
@@ -83,7 +84,9 @@ public class UserRepository extends GenericRepository {
      * @param email
      * @return
      */
-    public UserEntity getUserWithPendingInvitation(String email) {
+    public Optional<UserEntity> getUserWithPendingInvitation(
+            final String email
+    ) {
         TypedQuery<UserEntity> query = em.createQuery(
                 "select u from UserEntity u "
                         + "where lower(u.email) = :email "
@@ -91,9 +94,10 @@ public class UserRepository extends GenericRepository {
                         + "and u.invitationPending = true",
                 UserEntity.class
         );
+
         query.setParameter("email", email.toLowerCase());
 
-        return query.getResultList().stream().findFirst().orElse(null);
+        return query.getResultList().stream().findFirst();
     }
 
     /**
@@ -124,7 +128,7 @@ public class UserRepository extends GenericRepository {
         return query.getResultList();
     }
 
-    public UserEntity fetchByUuid(final String userUuid) {
+    public Optional<UserEntity> fetchByUuid(final String userUuid) {
         TypedQuery<UserEntity> query = em.createQuery(
                 "select u from UserEntity u "
                         + "where u.uuid = :userUuid ",
@@ -133,6 +137,6 @@ public class UserRepository extends GenericRepository {
 
         query.setParameter("userUuid", userUuid);
 
-        return query.getResultList().stream().findFirst().orElse(null);
+        return query.getResultList().stream().findFirst();
     }
 }

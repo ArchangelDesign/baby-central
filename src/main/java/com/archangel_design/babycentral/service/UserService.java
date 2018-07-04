@@ -143,10 +143,14 @@ public class UserService {
             final String email,
             final String password
     ) {
-        UserEntity user = userRepository.getUserWithPendingInvitation(email);
-
-        if (Objects.isNull(user))
-            throw new InvalidArgumentException(String.format("There is no pending invitation for user with email %s.", email));
+        UserEntity user = userRepository
+                .getUserWithPendingInvitation(email)
+                .orElseThrow(() -> new InvalidArgumentException(
+                        String.format(
+                                "There is no pending invitation for user with email %s.",
+                                email
+                        )
+                ));
 
         user.setLastUsage(Instant.now())
             .setPassword(hashPassword(password))
@@ -340,26 +344,25 @@ public class UserService {
         return userRepository.fetchOrganizationMembers(userEntity.getOrganization());
     }
 
-    public UserEntity getUser(String userUuid) {
+    public Optional<UserEntity> getUser(String userUuid) {
         return userRepository.fetchByUuid(userUuid);
     }
 
     public byte[] getUserAvatarData(final String uuid) {
-        UserEntity user = userRepository.fetchByUuid(uuid);
-
-        if (user == null)
-            throw new InvalidArgumentException("Invalid uuid.");
+        UserEntity user = userRepository
+                .fetchByUuid(uuid)
+                .orElseThrow(() -> new InvalidArgumentException("Invalid uuid."));
 
         return user.getAvatar();
     }
 
     public UserEntity setUserAvatar(String uuid, MultipartFile file) throws IOException {
-        UserEntity user = userRepository.fetchByUuid(uuid);
+        UserEntity user = userRepository
+                .fetchByUuid(uuid)
+                .orElseThrow(() -> new InvalidArgumentException("Invalid uuid."));
 
         if (file.isEmpty())
             throw new InvalidArgumentException("Empty image.");
-        if (user == null)
-            throw new InvalidArgumentException("Invalid uuid.");
 
         user.setAvatar(file.getBytes());
 

@@ -37,7 +37,7 @@ public class ShoppingCardController {
             @RequestBody final List<String> userUuids
     ) {
         List<UserEntity> users = userUuids.stream()
-                .map(userService::getUser)
+                .map(uuid -> userService.getUser(uuid).orElse(null))
                 .filter(Objects::nonNull)
                 .collect(Collectors.toList());
 
