@@ -112,7 +112,8 @@ public class UserService {
     ) throws InvalidArgumentException {
         if (isNullOrEmpty(email)
                 || isNullOrEmpty(firstName)
-                || isNullOrEmpty(password) || isNullOrEmpty(passwordRepeat)
+                || isNullOrEmpty(password)
+                || isNullOrEmpty(passwordRepeat)
         ) {
             throw new InvalidArgumentException("Missing required field.");
         }
@@ -276,10 +277,8 @@ public class UserService {
 
         email = email.toLowerCase();
 
-        /*
         if (email.equals(userEntity.getEmail()))
             throw new InvalidArgumentException("You cannot invite yourself silly.");
-        */
 
         if (userEntity.getOrganization() == null)
             throw new InvalidArgumentException("You did not create an organization yet.");
