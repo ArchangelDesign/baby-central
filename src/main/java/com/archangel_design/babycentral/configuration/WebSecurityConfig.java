@@ -63,7 +63,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .antMatchers("/favicon.ico").permitAll()
                 .antMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                 .antMatchers("/user/avatar/**").permitAll()
-                .antMatchers("/baby/avatar/**").permitAll()
+                .antMatchers("/user/baby/avatar/**").permitAll()
                 .anyRequest().authenticated();
 
         httpSecurity.exceptionHandling().authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED));
