@@ -171,7 +171,7 @@ public class UserController {
     public BabyEntity setBabyAvatar(
             @PathVariable final String uuid,
             @RequestParam("file") final MultipartFile file
-    ) throws IOException {
+    ) {
         return userService.setBabyAvatar(uuid, file);
     }
 }
