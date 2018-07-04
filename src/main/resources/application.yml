@@ -16,6 +16,7 @@ spring:
   servlet:
     multipart:
       maxFileSize: 5MB
+      maxRequestSize: 5MB
 
 server:
   port: 9001

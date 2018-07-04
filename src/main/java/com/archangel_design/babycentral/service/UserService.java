@@ -271,12 +271,15 @@ public class UserService {
     public Boolean inviteToOrganization(String email) {
         if (!EmailValidator.getInstance().isValid(email))
             throw new InvalidArgumentException("Invalid email.");
+
         UserEntity userEntity = sessionService.getCurrentSession().getUser();
 
         email = email.toLowerCase();
 
+        /*
         if (email.equals(userEntity.getEmail()))
             throw new InvalidArgumentException("You cannot invite yourself silly.");
+        */
 
         if (userEntity.getOrganization() == null)
             throw new InvalidArgumentException("You did not create an organization yet.");

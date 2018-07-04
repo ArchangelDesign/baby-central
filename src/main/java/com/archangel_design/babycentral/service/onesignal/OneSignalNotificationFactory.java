@@ -27,7 +27,13 @@ public class OneSignalNotificationFactory {
                 );
 
         // TODO logika treści wiadomości
-        notification.addMessage(Language.en, "tmp");
+        notification.addMessage(
+                Language.en,
+                String.format(
+                        scheduleEntry.getType().getMessageFormat(),
+                        scheduleEntry.getStart(),
+                        scheduleEntry.getStop())
+        );
 
         return notification;
     }
@@ -42,7 +48,13 @@ public class OneSignalNotificationFactory {
                 );
 
         // TODO logika treści wiadomości
-        notification.addMessage(Language.en, "tmp");
+        notification.addMessage(
+                Language.en,
+                String.format(
+                        scheduleEntry.getType().getMessageFormat(),
+                        scheduleEntry.getStart(),
+                        scheduleEntry.getStop())
+        );
 
         return notification;
     }

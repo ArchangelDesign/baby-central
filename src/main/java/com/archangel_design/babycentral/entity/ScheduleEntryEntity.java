@@ -41,7 +41,7 @@ public class ScheduleEntryEntity {
     private String title;
 
     @Enumerated(value = EnumType.STRING)
-    private ScheduleEntryType type;
+    private ScheduleEntryType type = ScheduleEntryType.BREAKFAST;
 
     private Time start;
 

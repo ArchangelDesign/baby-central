@@ -55,8 +55,6 @@ public class ShoppingCardEntity {
     @ManyToOne(targetEntity = UserEntity.class, optional = false)
     private UserEntity user;
 
-    // TODO ManyToMany?
-    @JoinColumn(name = "assignee_id")
-    @OneToMany(targetEntity = UserEntity.class)
+    @ManyToMany(targetEntity = UserEntity.class)
     private List<UserEntity> assignedUsers = new ArrayList<>();
 }
