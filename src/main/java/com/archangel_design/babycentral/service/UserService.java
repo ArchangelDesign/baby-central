@@ -7,26 +7,23 @@
 package com.archangel_design.babycentral.service;
 
 import com.archangel_design.babycentral.entity.*;
+import com.archangel_design.babycentral.enums.Gender;
 import com.archangel_design.babycentral.exception.InvalidArgumentException;
-import com.archangel_design.babycentral.exception.PersistenceLayerException;
 import com.archangel_design.babycentral.repository.UserRepository;
 import com.archangel_design.babycentral.request.BabyCredentialsRequest;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.validator.routines.EmailValidator;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.util.Comparator;
-import java.util.Date;
+import java.time.Instant;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
+import java.util.Date;
 
 import static com.mysql.jdbc.StringUtils.isNullOrEmpty;
 
@@ -108,11 +105,15 @@ public class UserService {
      * @throws InvalidArgumentException if case of validation errors
      */
     public UserEntity register(
-            final String email, final String firstName,
-            final String password, final String passwordRepeat
+            final String email,
+            final String firstName,
+            final String password,
+            final String passwordRepeat
     ) throws InvalidArgumentException {
-        if (isNullOrEmpty(email) || isNullOrEmpty(firstName)
-                || isNullOrEmpty(password) || isNullOrEmpty(passwordRepeat)) {
+        if (isNullOrEmpty(email)
+                || isNullOrEmpty(firstName)
+                || isNullOrEmpty(password) || isNullOrEmpty(passwordRepeat)
+        ) {
             throw new InvalidArgumentException("Missing required field.");
         }
 
@@ -120,29 +121,40 @@ public class UserService {
             throw new InvalidArgumentException("Passwords do not match.");
         }
 
-        if (userRepository.userExists(email)) {
-            // check if user has been invited
-            UserEntity userEntity = userRepository.getUserWithPendingInvitation(email);
-            if (userEntity != null) {
-                userEntity
-                        .setLastUsage(new Date())
-                        .setPassword(hashPassword(password))
-                        .setRegistration(new Date());
+        if (userRepository.userExists(email))
+            return completeUserRegistration(email, password);
+        else
+            return registerNewUser(email, password);
+    }
 
-                return userRepository.save(userEntity);
-            }
-            throw new InvalidArgumentException(
-                    String.format("User %s is already registered.", email)
-            );
-        }
+    private UserEntity completeUserRegistration(
+            final String email,
+            final String password
+    ) {
+        UserEntity user = userRepository.getUserWithPendingInvitation(email);
+        if (Objects.isNull(user))
+            throw new InvalidArgumentException(String.format(
+                "There is no pending invitation for user with email %s.", email
+            ));
 
-        UserEntity userEntity = new UserEntity();
-        userEntity.setEmail(email.toLowerCase())
-                .setLastUsage(new Date())
-                .setPassword(hashPassword(password))
-                .setRegistration(new Date());
+        user.setLastUsage(Instant.now())
+            .setPassword(hashPassword(password))
+            .setRegistration(Instant.now());
 
-        return userRepository.save(userEntity);
+        return userRepository.save(user);
+    }
+
+    private UserEntity registerNewUser(
+            final String email,
+            final String password
+    ) {
+        UserEntity user = new UserEntity();
+        user.setEmail(email.toLowerCase())
+            .setPassword(hashPassword(password))
+            .setLastUsage(Instant.now())
+            .setRegistration(Instant.now());
+
+        return userRepository.save(user);
     }
 
     /**
@@ -223,7 +235,9 @@ public class UserService {
 
     public BabyEntity updateBabyInformation(
             final String uuid,
-            final BabyCredentialsRequest babyCredentials
+            final Optional<String> name,
+            final Optional<Date> birthday,
+            final Optional<Gender> gender
     ) {
         BabyEntity baby = userRepository.fetchBaby(uuid);
 
@@ -231,12 +245,9 @@ public class UserService {
             // TODO Exception
         }
 
-        if (Objects.nonNull(babyCredentials.getName()))
-            baby.setName(StringUtils.capitalize(babyCredentials.getName()));
-        if (Objects.nonNull(babyCredentials.getBirthday()))
-            baby.setBirthday(babyCredentials.getBirthday());
-        if (Objects.nonNull(babyCredentials.getGender()))
-            baby.setGender(babyCredentials.getGender());
+        name.ifPresent(s -> baby.setName(StringUtils.capitalize(s)));
+        birthday.ifPresent(baby::setBirthday);
+        gender.ifPresent(baby::setGender);
 
         return userRepository.save(baby);
     }
@@ -321,16 +332,13 @@ public class UserService {
         return userRepository.fetchByUuid(userUuid);
     }
 
-    public ResponseEntity<byte[]> getUserAvatar(String uuid) {
+    public byte[] getUserAvatarData(final String uuid) {
         UserEntity user = userRepository.fetchByUuid(uuid);
 
         if (user == null)
             throw new InvalidArgumentException("Invalid uuid.");
 
-        final HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.IMAGE_JPEG);
-
-        return new ResponseEntity<>(user.getAvatar(), headers, HttpStatus.OK);
+        return user.getAvatar();
     }
 
     public UserEntity setUserAvatar(String uuid, MultipartFile file) throws IOException {
@@ -346,28 +354,31 @@ public class UserService {
         return userRepository.save(user);
     }
 
-    public ResponseEntity<byte[]> getBabyAvatar(String uuid) {
+    public byte[] getBabyAvatarData(final String uuid) {
         BabyEntity baby = userRepository.fetchBaby(uuid);
 
         if (baby == null)
             throw new InvalidArgumentException("Invalid uuid.");
 
-        final HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.IMAGE_JPEG);
-
-        return new ResponseEntity<>(baby.getAvatar(), headers,
-                HttpStatus.OK);
+        return baby.getAvatar();
     }
 
-    public BabyEntity setBabyAvatar(String uuid, MultipartFile file) throws IOException {
+    public BabyEntity setBabyAvatar(
+            final String uuid,
+            final MultipartFile file
+    ) {
         BabyEntity baby = userRepository.fetchBaby(uuid);
 
-        if (file.isEmpty())
-            throw new InvalidArgumentException("Empty image.");
         if (baby == null)
             throw new InvalidArgumentException("Invalid uuid.");
+        if (file.isEmpty())
+            throw new InvalidArgumentException("Empty image.");
 
-        baby.setAvatar(file.getBytes());
+        try {
+            baby.setAvatar(file.getBytes());
+        } catch (IOException e) {
+            throw new InvalidArgumentException("Empty image.");
+        }
 
         return userRepository.save(baby);
     }

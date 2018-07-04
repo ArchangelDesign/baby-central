@@ -11,7 +11,7 @@ import com.archangel_design.babycentral.enums.ScheduleEntryRepeatType;
 import com.archangel_design.babycentral.enums.ScheduleEntryType;
 import com.archangel_design.babycentral.repository.GenericRepository;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -23,59 +23,48 @@ import java.util.UUID;
 import java.util.function.Function;
 
 @Entity
-@Table(name = "schedule_entries")
 @Getter
+@Setter
+@Table(name = "schedule_entries")
 public class ScheduleEntryEntity {
 
-    @Id
     @GeneratedValue
+    @Id
+    @Setter(AccessLevel.NONE)
     private Long id;
 
     @Column(length = 36)
+    @Setter(AccessLevel.NONE)
     private String uuid = UUID.randomUUID().toString();
 
-    @Setter
     @Column(length = 120)
     private String title;
 
-    @Setter
     @Enumerated(value = EnumType.STRING)
     private ScheduleEntryType type;
 
-    @Setter
     private Time start;
 
-    @Setter
     private Time stop;
 
-    @Setter
     @Enumerated(EnumType.STRING)
     private ScheduleEntryPriority priority;
 
-    @Setter
     @Enumerated(EnumType.STRING)
     private ScheduleEntryRepeatType repeatType;
 
-    @Setter
     private Date startDate;
 
-    @Setter
     private Date endDate;
 
-    @Setter
     @JsonIgnore
-    @ManyToOne(targetEntity = ScheduleEntity.class, optional = false)
     @JoinColumn(name = "schedule_id")
+    @ManyToOne(targetEntity = ScheduleEntity.class, optional = false)
     private ScheduleEntity schedule;
 
-    // LOGIKA NOTYFIKACJI
     private Instant lastNotificationDate;
-    ///
 
-    // LOGIKA HIGH PRIOTITY ALERTÓW
-    @Setter
     private boolean isHighPriorityAlertActive = false;
-    ///
 
     public Function<GenericRepository, ScheduleEntryEntity> recordNotificationSend() {
         this.lastNotificationDate = Instant.now();

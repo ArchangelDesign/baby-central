@@ -10,25 +10,21 @@ import java.util.Date;
 import java.util.UUID;
 
 @Entity
-@Table(name = "shopping_card_entries")
 @Getter
-@Setter
 @JsonIgnoreProperties(value = {"id"})
+@Setter
+@Table(name = "shopping_card_entries")
 public class ShoppingCardEntryEntity {
 
-    @Id
     @GeneratedValue
+    @Id
     private Long id;
 
     @Column(length = 36)
     private String uuid = UUID.randomUUID().toString();
 
-/*    @ManyToOne(targetEntity = ShoppingCardEntity.class)
-    @JoinColumn(name = "shopping_card_id")
-    private ShoppingCardEntity shoppingCardEntity;*/
-
+    @Column(updatable = false)
     @CreationTimestamp
-    @Column(updatable=false)
     private Date creationDate;
 
     @Column(length = 120)
@@ -37,5 +33,4 @@ public class ShoppingCardEntryEntity {
     private Integer quantity;
 
     private Boolean isPurchased = false;
-
 }
