@@ -152,9 +152,9 @@ public class UserService {
                         )
                 ));
 
-        user.setLastUsage(Instant.now())
+        user.setLastUsage(new Date())
             .setPassword(hashPassword(password))
-            .setRegistration(Instant.now());
+            .setRegistration(new Date());
 
         return userRepository.save(user);
     }
@@ -166,8 +166,8 @@ public class UserService {
         UserEntity user = new UserEntity();
         user.setEmail(email.toLowerCase())
             .setPassword(hashPassword(password))
-            .setLastUsage(Instant.now())
-            .setRegistration(Instant.now());
+            .setLastUsage(new Date())
+            .setRegistration(new Date());
 
         return userRepository.save(user);
     }

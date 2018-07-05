@@ -7,7 +7,7 @@ import lombok.Setter;
 import lombok.experimental.Accessors;
 
 import javax.persistence.*;
-import java.time.Instant;
+import java.util.Date;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -35,9 +35,9 @@ public class UserEntity {
     @Column(length = 150)
     private String password;
 
-    private Instant registration;
+    private Date registration;
 
-    private Instant lastUsage;
+    private Date lastUsage;
 
     private Boolean deleted = false;
 
