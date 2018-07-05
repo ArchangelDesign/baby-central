@@ -6,36 +6,23 @@
 
 package com.archangel_design.babycentral.service;
 
-import com.archangel_design.babycentral.entity.BabyEntity;
-import com.archangel_design.babycentral.entity.OrganizationEntity;
-import com.archangel_design.babycentral.entity.SessionEntity;
-import com.archangel_design.babycentral.entity.UserEntity;
-import com.archangel_design.babycentral.entity.ProfileEntity;
+import com.archangel_design.babycentral.entity.*;
+import com.archangel_design.babycentral.enums.Gender;
 import com.archangel_design.babycentral.exception.InvalidArgumentException;
-import com.archangel_design.babycentral.exception.PersistenceLayerException;
-import com.archangel_design.babycentral.exception.UnreachableResourceException;
 import com.archangel_design.babycentral.repository.UserRepository;
-import org.apache.commons.io.IOUtils;
+import com.archangel_design.babycentral.request.BabyCredentialsRequest;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.validator.routines.EmailValidator;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import javax.servlet.http.HttpServletResponse;
-import javax.validation.constraints.NotNull;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.util.Comparator;
-import java.util.Date;
+import java.time.Instant;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
+import java.util.Date;
 
 import static com.mysql.jdbc.StringUtils.isNullOrEmpty;
 
@@ -48,17 +35,26 @@ public class UserService {
     /**
      * Used to manipulate current session.
      */
-    @Autowired
-    private SessionService sessionService;
+    private final SessionService sessionService;
 
     /**
      * Used to access persistence layer.
      */
-    @Autowired
-    private UserRepository userRepository;
+    private final UserRepository userRepository;
+    private final EmailService emailService;
+    private final ShoppingCardService shoppingCardService;
 
-    @Autowired
-    EmailService emailService;
+    public UserService(
+            final SessionService sessionService,
+            final UserRepository userRepository,
+            final EmailService emailService,
+            final ShoppingCardService shoppingCardService
+    ) {
+        this.sessionService = sessionService;
+        this.userRepository = userRepository;
+        this.emailService = emailService;
+        this.shoppingCardService = shoppingCardService;
+    }
 
     /**
      * Compares plain text password with given hash.
@@ -117,11 +113,16 @@ public class UserService {
      * @throws InvalidArgumentException if case of validation errors
      */
     public UserEntity register(
-            final String email, final String firstName,
-            final String password, final String passwordRepeat
+            final String email,
+            final String firstName,
+            final String password,
+            final String passwordRepeat
     ) throws InvalidArgumentException {
-        if (isNullOrEmpty(email) || isNullOrEmpty(firstName)
-                || isNullOrEmpty(password) || isNullOrEmpty(passwordRepeat)) {
+        if (isNullOrEmpty(email)
+                || isNullOrEmpty(firstName)
+                || isNullOrEmpty(password)
+                || isNullOrEmpty(passwordRepeat)
+        ) {
             throw new InvalidArgumentException("Missing required field.");
         }
 
@@ -129,29 +130,46 @@ public class UserService {
             throw new InvalidArgumentException("Passwords do not match.");
         }
 
-        if (userRepository.userExists(email)) {
-            // check if user has been invited
-            UserEntity userEntity = userRepository.getUserWithPendingInvitation(email);
-            if (userEntity != null) {
-                userEntity
-                        .setLastUsage(new Date())
-                        .setPassword(hashPassword(password))
-                        .setRegistration(new Date());
+        UserEntity user = userRepository.userExists(email) ?
+                completeUserRegistration(email, password) :
+                registerNewUser(email, password);
 
-                return userRepository.save(userEntity);
-            }
-            throw new InvalidArgumentException(
-                    String.format("User %s is already registered.", email)
-            );
-        }
+        shoppingCardService.addSampleShoppingCardsToUser(user);
 
-        UserEntity userEntity = new UserEntity();
-        userEntity.setEmail(email.toLowerCase())
-                .setLastUsage(new Date())
-                .setPassword(hashPassword(password))
-                .setRegistration(new Date());
+        return user;
+    }
 
-        return userRepository.save(userEntity);
+    private UserEntity completeUserRegistration(
+            final String email,
+            final String password
+    ) {
+        UserEntity user = userRepository
+                .getUserWithPendingInvitation(email)
+                .orElseThrow(() -> new InvalidArgumentException(
+                        String.format(
+                                "There is no pending invitation for user with email %s.",
+                                email
+                        )
+                ));
+
+        user.setLastUsage(new Date())
+            .setPassword(hashPassword(password))
+            .setRegistration(new Date());
+
+        return userRepository.save(user);
+    }
+
+    private UserEntity registerNewUser(
+            final String email,
+            final String password
+    ) {
+        UserEntity user = new UserEntity();
+        user.setEmail(email.toLowerCase())
+            .setPassword(hashPassword(password))
+            .setLastUsage(new Date())
+            .setRegistration(new Date());
+
+        return userRepository.save(user);
     }
 
     /**
@@ -199,36 +217,54 @@ public class UserService {
         return userRepository.save(userEntity);
     }
 
-    public BabyEntity createBaby(final UserEntity user, final BabyEntity babyEntity) {
-        if (babyEntity.getId() != null)
-            throw new InvalidArgumentException("Baby ID provided.");
+    public BabyEntity createBaby(
+            final UserEntity user,
+            final BabyCredentialsRequest babyCredentials
+    ) {
+        BabyEntity baby = new BabyEntity()
+                .setName(StringUtils.capitalize(babyCredentials.getName()))
+                .setGender(babyCredentials.getGender())
+                .setBirthday(babyCredentials.getBirthday());
 
-        babyEntity.setName(
-                babyEntity.getName().substring(0, 1).toUpperCase()
-                        + babyEntity.getName().substring(1)
-        );
+        user.getBabies().add(baby);
+        userRepository.save(user);
 
+        return baby;
+        /*
         user.getBabies().forEach(b -> {
             if (b.getName().toLowerCase().equals(babyEntity.getName().toLowerCase()))
                 throw new InvalidArgumentException(
                         "You already have a baby named " + babyEntity.getName());
         });
+        */
 
-        user.getBabies().add(babyEntity);
-        UserEntity updatedUser = userRepository.save(user);
+        /*
         return updatedUser.getBabies().stream().max(Comparator.comparing(
                 BabyEntity::getId)).orElseThrow(PersistenceLayerException::new);
+        */
     }
 
     public BabyEntity getBaby(String babyId) {
         return userRepository.fetchBaby(babyId);
     }
 
-    public BabyEntity updateBabyInformation(BabyEntity babyEntity) {
-        if (babyEntity.getUuid() == null)
-            throw new InvalidArgumentException("No baby ID provided");
+    public BabyEntity updateBabyInformation(
+            final String uuid,
+            final Optional<String> name,
+            final Optional<Date> birthday,
+            final Optional<Gender> gender
+    ) {
+        BabyEntity baby = userRepository.fetchBaby(uuid);
 
-        return null;
+        if (Objects.isNull(baby)) {
+            // TODO Exception
+        }
+
+        name.ifPresent(s -> baby.setName(StringUtils.capitalize(s)));
+        birthday.ifPresent(baby::setBirthday);
+        gender.ifPresent(baby::setGender);
+
+        return userRepository.save(baby);
     }
 
     public void removeBaby(final String uuid) {
@@ -250,6 +286,7 @@ public class UserService {
     public Boolean inviteToOrganization(String email) {
         if (!EmailValidator.getInstance().isValid(email))
             throw new InvalidArgumentException("Invalid email.");
+
         UserEntity userEntity = sessionService.getCurrentSession().getUser();
 
         email = email.toLowerCase();
@@ -307,57 +344,56 @@ public class UserService {
         return userRepository.fetchOrganizationMembers(userEntity.getOrganization());
     }
 
-    public UserEntity getUser(String userUuid) {
+    public Optional<UserEntity> getUser(String userUuid) {
         return userRepository.fetchByUuid(userUuid);
     }
 
-    public ResponseEntity getUserAvatar(String uuid) {
-        UserEntity user = userRepository.fetchByUuid(uuid);
+    public byte[] getUserAvatarData(final String uuid) {
+        UserEntity user = userRepository
+                .fetchByUuid(uuid)
+                .orElseThrow(() -> new InvalidArgumentException("Invalid uuid."));
 
-        if (user == null)
-            throw new InvalidArgumentException("Invalid uuid.");
-
-        final HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.IMAGE_JPEG);
-
-        return new ResponseEntity<>(user.getAvatar(), headers, HttpStatus.OK);
+        return user.getAvatar();
     }
 
     public UserEntity setUserAvatar(String uuid, MultipartFile file) throws IOException {
-        UserEntity user = userRepository.fetchByUuid(uuid);
+        UserEntity user = userRepository
+                .fetchByUuid(uuid)
+                .orElseThrow(() -> new InvalidArgumentException("Invalid uuid."));
 
         if (file.isEmpty())
             throw new InvalidArgumentException("Empty image.");
-        if (user == null)
-            throw new InvalidArgumentException("Invalid uuid.");
 
         user.setAvatar(file.getBytes());
 
         return userRepository.save(user);
     }
 
-    public ResponseEntity<byte[]> getBabyAvatar(String uuid) {
+    public byte[] getBabyAvatarData(final String uuid) {
         BabyEntity baby = userRepository.fetchBaby(uuid);
 
         if (baby == null)
             throw new InvalidArgumentException("Invalid uuid.");
 
-        final HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.IMAGE_JPEG);
-
-        return new ResponseEntity<byte[]>(baby.getAvatar(), headers,
-                HttpStatus.OK);
+        return baby.getAvatar();
     }
 
-    public BabyEntity setBabyAvatar(String uuid, MultipartFile file) throws IOException {
+    public BabyEntity setBabyAvatar(
+            final String uuid,
+            final MultipartFile file
+    ) {
         BabyEntity baby = userRepository.fetchBaby(uuid);
 
-        if (file.isEmpty())
-            throw new InvalidArgumentException("Empty image.");
         if (baby == null)
             throw new InvalidArgumentException("Invalid uuid.");
+        if (file.isEmpty())
+            throw new InvalidArgumentException("Empty image.");
 
-        baby.setAvatar(file.getBytes());
+        try {
+            baby.setAvatar(file.getBytes());
+        } catch (IOException e) {
+            throw new InvalidArgumentException("Empty image.");
+        }
 
         return userRepository.save(baby);
     }

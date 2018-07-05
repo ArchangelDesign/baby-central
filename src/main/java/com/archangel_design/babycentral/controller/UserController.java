@@ -9,7 +9,7 @@ package com.archangel_design.babycentral.controller;
 import com.archangel_design.babycentral.entity.BabyEntity;
 import com.archangel_design.babycentral.entity.ProfileEntity;
 import com.archangel_design.babycentral.entity.UserEntity;
-import com.archangel_design.babycentral.exception.UnreachableResourceException;
+import com.archangel_design.babycentral.request.BabyCredentialsRequest;
 import com.archangel_design.babycentral.request.EmailRequest;
 import com.archangel_design.babycentral.request.LocationUpdateRequest;
 import com.archangel_design.babycentral.service.LocationService;
@@ -17,13 +17,16 @@ import com.archangel_design.babycentral.service.SessionService;
 import com.archangel_design.babycentral.service.UserService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Main controller responsible for user operations
@@ -89,11 +92,12 @@ public class UserController {
     @PostMapping("/baby")
     @ApiOperation("Create a baby entity")
     public BabyEntity createBaby(
-            @RequestBody BabyEntity babyEntity
+            @RequestBody BabyCredentialsRequest babyCredentials
     ) {
         return userService.createBaby(
                 sessionService.getCurrentSession().getUser(),
-                babyEntity);
+                babyCredentials
+        );
     }
 
     @GetMapping("/baby/{babyId}")
@@ -103,11 +107,17 @@ public class UserController {
         return userService.getBaby(babyId);
     }
 
-    @PutMapping("/baby")
+    @PutMapping("/baby/{uuid}")
     public BabyEntity updateBabyInformation(
-            @RequestBody BabyEntity babyEntity
+            @PathVariable final String uuid,
+            @RequestBody final BabyCredentialsRequest babyCredentials
     ) {
-        return userService.updateBabyInformation(babyEntity);
+        return userService.updateBabyInformation(
+                uuid,
+                Optional.ofNullable(babyCredentials.getName()),
+                Optional.ofNullable(babyCredentials.getBirthday()),
+                Optional.ofNullable(babyCredentials.getGender())
+        );
     }
 
     @DeleteMapping("/baby/{uuid}")
@@ -126,28 +136,42 @@ public class UserController {
     }
 
     @GetMapping("/avatar/{uuid}")
-    public ResponseEntity<byte[]> getUserAvatar(@PathVariable final String uuid) {
-        return userService.getUserAvatar(uuid);
+    public ResponseEntity<byte[]> getUserAvatar(
+            @PathVariable final String uuid
+    ) {
+        final HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.IMAGE_JPEG);
+
+        byte[] userAvatarData = userService.getUserAvatarData(uuid);
+
+        return new ResponseEntity<>(userAvatarData, headers, HttpStatus.OK);
     }
 
     @PostMapping("/avatar/{uuid}")
     public UserEntity setUserAvatar(
             @PathVariable final String uuid,
-            @RequestParam("file") MultipartFile file
+            @RequestParam("file") final MultipartFile file
     ) throws IOException {
         return userService.setUserAvatar(uuid, file);
     }
 
     @GetMapping("baby/avatar/{uuid}")
-    public ResponseEntity<byte[]> getBabyAvatar(@PathVariable final String uuid) {
-        return userService.getBabyAvatar(uuid);
+    public ResponseEntity<byte[]> getBabyAvatar(
+            @PathVariable final String uuid
+    ) {
+        final HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.IMAGE_JPEG);
+
+        byte[] babyAvatarData = userService.getBabyAvatarData(uuid);
+
+        return new ResponseEntity<>(babyAvatarData, headers, HttpStatus.OK);
     }
 
     @PostMapping("baby/avatar/{uuid}")
     public BabyEntity setBabyAvatar(
             @PathVariable final String uuid,
-            @RequestParam("file") MultipartFile file
-    ) throws IOException {
+            @RequestParam("file") final MultipartFile file
+    ) {
         return userService.setBabyAvatar(uuid, file);
     }
 }

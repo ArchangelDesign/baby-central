@@ -2,22 +2,34 @@ package com.archangel_design.babycentral.entity;
 
 import com.archangel_design.babycentral.enums.ShoppingCardStatus;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.experimental.Accessors;
 import org.hibernate.annotations.CreationTimestamp;
 
 import javax.persistence.*;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.UUID;
+import java.util.Date;
 
+@Accessors(chain = true)
 @Entity
-@Table(name = "shopping_card")
+@Getter
 @JsonIgnoreProperties(value = {"id"})
+@Setter
+@Table(name = "shopping_card")
 public class ShoppingCardEntity {
 
-    @Id
     @GeneratedValue
+    @Id
+    @Setter(AccessLevel.NONE)
     private Long id;
+
+    @Column(length = 36)
+    @Setter(AccessLevel.NONE)
+    private String uuid = UUID.randomUUID().toString();
 
     @Column(length = 120)
     private String name;
@@ -25,98 +37,25 @@ public class ShoppingCardEntity {
     @Column(columnDefinition = "TEXT")
     private String description;
 
-    @Column(length = 36)
-    private String uuid = UUID.randomUUID().toString();
-
+    @Column(updatable = false)
     @CreationTimestamp
-    @Column(updatable=false)
-    private Date creationDate;
+    @Setter(AccessLevel.NONE)
+    private Date creationDate = new Date();
 
     @Enumerated(value = EnumType.STRING)
     private ShoppingCardStatus status = ShoppingCardStatus.DRAFT;
 
-    @OneToMany(targetEntity = ShoppingCardEntryEntity.class, cascade = CascadeType.ALL)
     @JoinColumn(name = "shopping_card_id")
+    @OneToMany(
+            targetEntity = ShoppingCardEntryEntity.class,
+            cascade = CascadeType.ALL
+    )
     private List<ShoppingCardEntryEntity> entries = new ArrayList<>();
 
-    @ManyToOne(targetEntity = UserEntity.class, optional = false)
     @JoinColumn(name = "user_id")
+    @ManyToOne(targetEntity = UserEntity.class, optional = false)
     private UserEntity user;
 
-    @OneToMany(targetEntity = UserEntity.class)
-    @JoinColumn(name = "assignee_id")
+    @ManyToMany(targetEntity = UserEntity.class)
     private List<UserEntity> assignedUsers = new ArrayList<>();
-
-    public Long getId() {
-        return id;
-    }
-
-    public ShoppingCardEntity setId(Long id) {
-        this.id = id;
-        return this;
-    }
-
-    public UserEntity getUser() {
-        return user;
-    }
-
-    public ShoppingCardEntity setUser(UserEntity user) {
-        this.user = user;
-        return this;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public ShoppingCardEntity setName(String name) {
-        this.name = name;
-        return this;
-    }
-
-    public String getUuid() {
-        return uuid;
-    }
-
-    public ShoppingCardEntity setUuid(String uuid) {
-        this.uuid = uuid;
-        return this;
-    }
-
-    public List<ShoppingCardEntryEntity> getEntries() {
-        return entries;
-    }
-
-    public ShoppingCardEntity setEntries(List<ShoppingCardEntryEntity> entries) {
-        this.entries = entries;
-        return this;
-    }
-
-    public ShoppingCardStatus getStatus() { return status; }
-
-    public void setStatus(ShoppingCardStatus shoppingCardStatus) { this.status = shoppingCardStatus; }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
-    public Date getCreationDate() {
-        return creationDate;
-    }
-
-    public void setCreationDate(Date creationDate) {
-        this.creationDate = creationDate;
-    }
-
-    public List<UserEntity> getAssignedUsers() {
-        return assignedUsers;
-    }
-
-    public void setAssignedUsers(List<UserEntity> assignedUsers) {
-        this.assignedUsers = assignedUsers;
-    }
 }

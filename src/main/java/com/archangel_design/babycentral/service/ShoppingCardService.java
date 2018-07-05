@@ -4,7 +4,6 @@ import com.archangel_design.babycentral.entity.*;
 import com.archangel_design.babycentral.enums.ShoppingCardStatus;
 import com.archangel_design.babycentral.exception.InvalidArgumentException;
 import com.archangel_design.babycentral.repository.ShoppingCardRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.validation.constraints.NotNull;
@@ -13,28 +12,81 @@ import java.util.List;
 @Service
 public class ShoppingCardService {
 
-    @Autowired
-    SessionService sessionService;
+    private final SessionService sessionService;
+    private final ShoppingCardRepository shoppingCardRepository;
 
-    @Autowired
-    UserService userService;
+    public ShoppingCardService(
+            final SessionService sessionService,
+            final ShoppingCardRepository shoppingCardRepository
+    ) {
+        this.sessionService = sessionService;
+        this.shoppingCardRepository = shoppingCardRepository;
+    }
 
-    @Autowired
-    ShoppingCardRepository shoppingCardRepository;
-
-    public ShoppingCardEntity createShoppingCard(
-            @NotNull final String name, final String description
+    public ShoppingCardEntity createShoppingCardForCurrentUser(
+            @NotNull final String name,
+            final String description
     ) {
         UserEntity user = sessionService.getCurrentSession().getUser();
 
-        ShoppingCardEntity shoppingCardEntity = new ShoppingCardEntity();
+        return createShoppingCard(user, name, description);
+    }
 
-        shoppingCardEntity
-                .setName(name)
+    public void addSampleShoppingCardsToUser(final UserEntity user) {
+        ShoppingCardEntity sampleShoppingCard = createShoppingCard(
+                user, "Sample", "This is sample shopping card."
+        );
+
+        ShoppingCardEntryEntity shoppingCardEntry_Milk =
+                createShoppingCardEntry("Milk", 2);
+        ShoppingCardEntryEntity shoppingCardEntry_Eggs =
+                createShoppingCardEntry("Eggs", 10);
+        ShoppingCardEntryEntity shoppingCardEntry_Gta5 =
+                createShoppingCardEntry("GTA V", 1);
+
+        sampleShoppingCard.getEntries().add(shoppingCardEntry_Milk);
+        sampleShoppingCard.getEntries().add(shoppingCardEntry_Eggs);
+        sampleShoppingCard.getEntries().add(shoppingCardEntry_Gta5);
+
+        shoppingCardRepository.save(sampleShoppingCard);
+    }
+
+    private ShoppingCardEntity createShoppingCard(
+            final UserEntity user,
+            final String name,
+            final String description
+    ) {
+        ShoppingCardEntity shoppingCard = new ShoppingCardEntity();
+
+        shoppingCard
                 .setUser(user)
+                .setName(name)
                 .setDescription(description);
 
-        return shoppingCardRepository.save(shoppingCardEntity);
+        return shoppingCardRepository.save(shoppingCard);
+    }
+
+    private ShoppingCardEntryEntity createShoppingCardEntry(
+            final String name,
+            final int quantity
+    ) {
+        return new ShoppingCardEntryEntity()
+                .setArticleName(name)
+                .setQuantity(quantity);
+    }
+
+    public ShoppingCardEntity assignShoppingCardToUsers(
+            final String uuid,
+            final List<UserEntity> users
+    ) {
+        ShoppingCardEntity shoppingCard = shoppingCardRepository.fetch(uuid);
+
+        if (shoppingCard == null)
+            throw new InvalidArgumentException("shoppingCardEntity does not exist.");
+
+        users.forEach(user -> shoppingCard.getAssignedUsers().add(user));
+
+        return shoppingCardRepository.save(shoppingCard);
     }
 
     public ShoppingCardEntity createEntry(
@@ -66,24 +118,6 @@ public class ShoppingCardService {
     public List<ShoppingCardEntity> getList(String uuid) {
         UserEntity user = sessionService.getCurrentSession().getUser();
         return shoppingCardRepository.fetchList(user, uuid);
-    }
-
-    public ShoppingCardEntity assignShoppingCard(String uuid, List<String> users) {
-        ShoppingCardEntity shoppingCardEntity = shoppingCardRepository.fetch(uuid);
-
-        if (shoppingCardEntity == null)
-            throw new InvalidArgumentException("shoppingCardEntity does not exist.");
-
-        for (String userUuid : users) {
-            UserEntity userEntity = userService.getUser(userUuid);
-
-            if (userEntity == null)
-                throw new InvalidArgumentException(String.format("User %s does not exist.", userUuid));
-
-            shoppingCardEntity.getAssignedUsers().add(userEntity);
-        }
-
-        return shoppingCardRepository.save(shoppingCardEntity);
     }
 
     public ShoppingCardEntity setStatusToDraft(String uuid) {

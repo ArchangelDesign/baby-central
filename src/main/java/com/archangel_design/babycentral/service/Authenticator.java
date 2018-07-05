@@ -65,6 +65,12 @@ public class Authenticator extends UsernamePasswordAuthenticationToken {
         if (request.getRequestURI().matches("\\/webjars.*"))
             return true;
 
+        if (request.getRequestURI().matches("\\/user/avatar/.*"))
+            return true;
+
+        if (request.getRequestURI().matches("\\/user/baby/avatar/.*"))
+            return true;
+
         SessionEntity s = sessionServiceService.getSession(request.getHeader("Authorization"));
         return s != null;
     }

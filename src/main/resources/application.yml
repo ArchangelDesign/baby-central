@@ -13,6 +13,10 @@ spring:
     username: root
     password: root
 #    driver-class-name: com.mysql.cj.jdbc.Driver
+  servlet:
+    multipart:
+      maxFileSize: 5MB
+      maxRequestSize: 5MB
 
 server:
   port: 9001

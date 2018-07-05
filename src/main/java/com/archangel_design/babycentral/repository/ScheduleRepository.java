@@ -70,8 +70,8 @@ public class ScheduleRepository extends GenericRepository {
 
     // TODO NAZWA
     public List<ScheduleEntryEntity> fetchPrefiltredScheduleEntriesForNotificationSending() {
-        Instant d1 = Instant.now().minus(Duration.ofMinutes(20));
-        Instant d2 = Instant.now().plus(Duration.ofMinutes(20));
+        Instant d1 = Instant.now().minus(Duration.ofMinutes(5));
+        Instant d2 = Instant.now().plus(Duration.ofMinutes(5));
 
         TypedQuery<ScheduleEntryEntity> query = em.createQuery(
                 "select s from ScheduleEntryEntity s " +
