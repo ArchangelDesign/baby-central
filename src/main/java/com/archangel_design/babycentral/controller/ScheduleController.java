@@ -17,6 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/schedule")
@@ -104,7 +105,14 @@ public class ScheduleController {
     ) {
         return scheduleService.updateScheduleEntryEntity(
                 uuid,
-                scheduleEntryRequest
+                Optional.ofNullable(scheduleEntryRequest.getTitle()),
+                Optional.ofNullable(scheduleEntryRequest.getType()),
+                Optional.ofNullable(scheduleEntryRequest.getPriority()),
+                Optional.ofNullable(scheduleEntryRequest.getRepeatType()),
+                Optional.ofNullable(scheduleEntryRequest.getStart()),
+                Optional.ofNullable(scheduleEntryRequest.getStop()),
+                Optional.ofNullable(scheduleEntryRequest.getStartDate()),
+                Optional.ofNullable(scheduleEntryRequest.getEndDate())
         );
     }
 }

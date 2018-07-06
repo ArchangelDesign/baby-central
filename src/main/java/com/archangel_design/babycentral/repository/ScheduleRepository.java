@@ -33,7 +33,7 @@ public class ScheduleRepository extends GenericRepository {
         return query.getResultList().stream().findFirst().orElse(null);
     }
 
-    public ScheduleEntryEntity fetchEntry(@NotNull final String entryUuid) {
+    public Optional<ScheduleEntryEntity> fetchEntry(@NotNull final String entryUuid) {
         TypedQuery<ScheduleEntryEntity> query = em.createQuery(
                 "select s from ScheduleEntryEntity s "
                         + "where s.uuid = :id", ScheduleEntryEntity.class
@@ -41,7 +41,7 @@ public class ScheduleRepository extends GenericRepository {
 
         query.setParameter("id", entryUuid);
 
-        return query.getResultList().stream().findFirst().orElse(null);
+        return query.getResultList().stream().findFirst();
     }
 
     public List<ScheduleEntity> fetchList(UserEntity user) {
@@ -70,20 +70,16 @@ public class ScheduleRepository extends GenericRepository {
 
     // TODO NAZWA
     public List<ScheduleEntryEntity> fetchPrefiltredScheduleEntriesForNotificationSending() {
-        Instant d1 = Instant.now().minus(Duration.ofMinutes(5));
-        Instant d2 = Instant.now().plus(Duration.ofMinutes(5));
-
         TypedQuery<ScheduleEntryEntity> query = em.createQuery(
                 "select s from ScheduleEntryEntity s " +
                         "where s.isHighPriorityAlertActive = false " +
-                        "and DATE(SYSDATE()) between DATE(s.startDate) and DATE(s.endDate) " +
-                        "and s.start between :d1 and :d2 " +
+                        "and DATE(SYSDATE()) between DATE(s.notificationStartDate) and DATE(s.notificationEndDate) " +
+                        "and s.notificationStart < :currentTime " +
                         "and (s.lastNotificationDate is null or DATE(s.lastNotificationDate) < DATE(SYSDATE()))",
                 ScheduleEntryEntity.class
         );
 
-        query.setParameter("d1", Date.from(d1), TemporalType.TIME);
-        query.setParameter("d2", Date.from(d2), TemporalType.TIME);
+        query.setParameter("currentTime", new Date(), TemporalType.TIME);
 
         return query.getResultList();
     }
