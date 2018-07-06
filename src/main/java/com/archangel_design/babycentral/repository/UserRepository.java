@@ -12,6 +12,7 @@ import com.archangel_design.babycentral.entity.UserEntity;
 import org.springframework.stereotype.Repository;
 import javax.persistence.TypedQuery;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 @Repository

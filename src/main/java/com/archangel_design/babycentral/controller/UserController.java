@@ -85,8 +85,8 @@ public class UserController {
     }
 
     @GetMapping("/babies")
-    public List<BabyEntity> getBabies() {
-        return sessionService.getCurrentSession().getUser().getBabies();
+    public List<BabyEntity> getBabiesForCurrentUser() {
+        return userService.getBabiesForCurrentUser();
     }
 
     @PostMapping("/baby")

@@ -18,7 +18,9 @@ import lombok.Setter;
 import javax.persistence.*;
 import java.sql.Time;
 import java.time.Instant;
-import java.util.Date;
+import java.time.LocalTime;
+import java.time.temporal.ChronoUnit;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Function;
 
@@ -43,9 +45,17 @@ public class ScheduleEntryEntity {
     @Enumerated(value = EnumType.STRING)
     private ScheduleEntryType type = ScheduleEntryType.BREAKFAST;
 
+    @Setter(AccessLevel.NONE)
     private Time start;
 
+    @Setter(AccessLevel.NONE)
     private Time stop;
+
+    @Setter(AccessLevel.NONE)
+    private Instant startDate;
+
+    @Setter(AccessLevel.NONE)
+    private Instant endDate;
 
     @Enumerated(EnumType.STRING)
     private ScheduleEntryPriority priority;
@@ -53,18 +63,26 @@ public class ScheduleEntryEntity {
     @Enumerated(EnumType.STRING)
     private ScheduleEntryRepeatType repeatType;
 
-    private Date startDate;
-
-    private Date endDate;
-
     @JsonIgnore
     @JoinColumn(name = "schedule_id")
     @ManyToOne(targetEntity = ScheduleEntity.class, optional = false)
     private ScheduleEntity schedule;
 
-    private Instant lastNotificationDate;
+    private long ilePrzedEventemMaMniePoinformowac = 600000; // millis
 
     private boolean isHighPriorityAlertActive = false;
+
+    @Setter(AccessLevel.NONE)
+    private Instant lastNotificationDate;
+
+    @Setter(AccessLevel.NONE)
+    private Time notificationStart;
+
+    @Setter(AccessLevel.NONE)
+    private Instant notificationStartDate;
+
+    @Setter(AccessLevel.NONE)
+    private Instant notificationEndDate;
 
     public Function<GenericRepository, ScheduleEntryEntity> recordNotificationSend() {
         this.lastNotificationDate = Instant.now();
@@ -78,5 +96,47 @@ public class ScheduleEntryEntity {
 
     public UserEntity getCorrespondingUser() {
         return schedule.getUser();
+    }
+
+    public void setIlePrzedEventemMaMniePoinformowac(
+            final long ilePrzedEventemMaMniePoinformowac
+    ) {
+        this.ilePrzedEventemMaMniePoinformowac = ilePrzedEventemMaMniePoinformowac;
+        updateNotificationTimestamp();
+    }
+
+    public void updateTimestamp(
+            final Optional<Time> start,
+            final Optional<Time> stop,
+            final Optional<Instant> startDate,
+            final Optional<Instant> endDate
+    ) {
+        start.ifPresent(s -> this.start = s);
+        stop.ifPresent(s -> this.stop = s);
+        startDate.ifPresent(s -> this.startDate = s);
+        endDate.ifPresent(e -> this.endDate = e);
+
+        updateNotificationTimestamp();
+    }
+
+    private void updateNotificationTimestamp() {
+        notificationStart = Time.valueOf(
+                start.toLocalTime().minus(
+                        ilePrzedEventemMaMniePoinformowac,
+                        ChronoUnit.MILLIS)
+        );
+
+        notificationStartDate =
+                startDate
+                        .truncatedTo(ChronoUnit.DAYS)
+                        .plusSeconds(start.toLocalTime().toSecondOfDay())
+                        .minus(ilePrzedEventemMaMniePoinformowac, ChronoUnit.MILLIS);
+
+        notificationEndDate =
+                endDate
+                        .truncatedTo(ChronoUnit.DAYS)
+                        .plusSeconds(start.toLocalTime().toSecondOfDay())
+                        .minus(ilePrzedEventemMaMniePoinformowac, ChronoUnit.MILLIS);
+
     }
 }

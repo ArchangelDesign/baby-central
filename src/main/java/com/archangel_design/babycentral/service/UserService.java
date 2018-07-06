@@ -17,12 +17,9 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.jws.soap.SOAPBinding;
 import java.io.IOException;
-import java.time.Instant;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Date;
+import java.util.*;
 
 import static com.mysql.jdbc.StringUtils.isNullOrEmpty;
 
@@ -225,6 +222,7 @@ public class UserService {
                 .setName(StringUtils.capitalize(babyCredentials.getName()))
                 .setGender(babyCredentials.getGender())
                 .setBirthday(babyCredentials.getBirthday());
+        //baby.setParent(user);
 
         user.getBabies().add(baby);
         userRepository.save(user);
@@ -396,5 +394,20 @@ public class UserService {
         }
 
         return userRepository.save(baby);
+    }
+
+    public List<BabyEntity> getBabiesForCurrentUser() {
+        UserEntity currentUser = sessionService.getCurrentSession().getUser();
+
+        if (Objects.isNull(currentUser.getOrganization()))
+            return currentUser.getBabies();
+
+        List<UserEntity> usersInOrganization =
+                userRepository.fetchOrganizationMembers(currentUser.getOrganization());
+
+        ArrayList<BabyEntity> babies = new ArrayList<>();
+        usersInOrganization.forEach(user -> babies.addAll(user.getBabies()));
+
+        return babies;
     }
 }
