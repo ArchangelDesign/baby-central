@@ -43,18 +43,22 @@ public class UserEntity {
 
     private Boolean invitationPending = false;
 
+    @OneToMany(
+            cascade = CascadeType.ALL,
+            targetEntity = BabyEntity.class
+    )
     @JoinColumn(name = "parent_id")
-    @OneToMany(targetEntity = BabyEntity.class, cascade = CascadeType.ALL)
     private List<BabyEntity> babies = new ArrayList<>();
 
     @JoinColumn(name = "organization_id")
     @ManyToOne(
-            targetEntity = OrganizationEntity.class,
             cascade = {
                     CascadeType.PERSIST,
                     CascadeType.MERGE,
                     CascadeType.REFRESH
-            })
+            },
+            targetEntity = OrganizationEntity.class
+    )
     private OrganizationEntity organization;
 
     @JoinColumn(name = "profile_id")

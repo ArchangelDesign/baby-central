@@ -34,19 +34,21 @@ public class ShoppingCardService {
 
     public void addSampleShoppingCardsToUser(final UserEntity user) {
         ShoppingCardEntity sampleShoppingCard = createShoppingCard(
-                user, "Sample", "This is sample shopping card."
+                user,
+                "Shopping card list",
+                "This is sample shopping card list. You may create as many tasks you want."
         );
 
         ShoppingCardEntryEntity shoppingCardEntry_Milk =
                 createShoppingCardEntry("Milk", 2);
         ShoppingCardEntryEntity shoppingCardEntry_Eggs =
                 createShoppingCardEntry("Eggs", 10);
-        ShoppingCardEntryEntity shoppingCardEntry_Gta5 =
-                createShoppingCardEntry("GTA V", 1);
+        ShoppingCardEntryEntity shoppingCardEntry_Apples =
+                createShoppingCardEntry("Apples", 4);
 
         sampleShoppingCard.getEntries().add(shoppingCardEntry_Milk);
         sampleShoppingCard.getEntries().add(shoppingCardEntry_Eggs);
-        sampleShoppingCard.getEntries().add(shoppingCardEntry_Gta5);
+        sampleShoppingCard.getEntries().add(shoppingCardEntry_Apples);
 
         shoppingCardRepository.save(sampleShoppingCard);
     }

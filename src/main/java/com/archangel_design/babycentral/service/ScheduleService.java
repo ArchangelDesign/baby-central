@@ -13,7 +13,6 @@ import com.archangel_design.babycentral.enums.ScheduleEntryType;
 import com.archangel_design.babycentral.exception.InvalidArgumentException;
 import com.archangel_design.babycentral.repository.ScheduleRepository;
 import com.archangel_design.babycentral.repository.UserRepository;
-import com.archangel_design.babycentral.request.ScheduleEntryRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -24,7 +23,6 @@ import java.time.Instant;
 import static java.time.temporal.ChronoField.*;
 
 import java.time.LocalDate;
-import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -70,8 +68,8 @@ public class ScheduleService {
             @NotNull final Time stop,
             @NotNull final ScheduleEntryPriority priority,
             @NotNull final ScheduleEntryRepeatType repeatType,
-            final Date startDate,
-            final Date stopDate,
+            final Instant startDate,
+            final Instant stopDate,
             final String title
     ) {
         ScheduleEntity scheduleEntity = scheduleRepository.fetch(scheduleId);
@@ -219,8 +217,8 @@ public class ScheduleService {
             final Optional<ScheduleEntryRepeatType> repeatType,
             final Optional<Time> start,
             final Optional<Time> stop,
-            final Optional<Date> startDate,
-            final Optional<Date> endDate
+            final Optional<Instant> startDate,
+            final Optional<Instant> endDate
     ) {
         ScheduleEntryEntity scheduleEntry = scheduleRepository
                 .fetchEntry(uuid)

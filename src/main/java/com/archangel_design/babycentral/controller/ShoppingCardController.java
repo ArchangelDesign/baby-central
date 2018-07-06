@@ -31,7 +31,7 @@ public class ShoppingCardController {
         this.userService = userService;
     }
 
-    @PostMapping("/assign/{uuid}")
+    @PostMapping("/assign/{shoppingCardUuid}")
     public ShoppingCardEntity assignShoppingCardToUsers(
             @PathVariable final String shoppingCardUuid,
             @RequestBody final List<String> userUuids

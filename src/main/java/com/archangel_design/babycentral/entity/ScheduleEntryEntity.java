@@ -20,7 +20,6 @@ import java.sql.Time;
 import java.time.Instant;
 import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;
-import java.util.Date;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Function;
@@ -53,10 +52,10 @@ public class ScheduleEntryEntity {
     private Time stop;
 
     @Setter(AccessLevel.NONE)
-    private Date startDate;
+    private Instant startDate;
 
     @Setter(AccessLevel.NONE)
-    private Date endDate;
+    private Instant endDate;
 
     @Enumerated(EnumType.STRING)
     private ScheduleEntryPriority priority;
@@ -109,8 +108,8 @@ public class ScheduleEntryEntity {
     public void updateTimestamp(
             final Optional<Time> start,
             final Optional<Time> stop,
-            final Optional<Date> startDate,
-            final Optional<Date> endDate
+            final Optional<Instant> startDate,
+            final Optional<Instant> endDate
     ) {
         start.ifPresent(s -> this.start = s);
         stop.ifPresent(s -> this.stop = s);
@@ -121,20 +120,23 @@ public class ScheduleEntryEntity {
     }
 
     private void updateNotificationTimestamp() {
-        final LocalTime notificationStartAsLocalTime = start.toLocalTime()
-                .minus(ilePrzedEventemMaMniePoinformowac, ChronoUnit.MILLIS);
-
-        notificationStart = Time.valueOf(notificationStartAsLocalTime);
+        notificationStart = Time.valueOf(
+                start.toLocalTime().minus(
+                        ilePrzedEventemMaMniePoinformowac,
+                        ChronoUnit.MILLIS)
+        );
 
         notificationStartDate =
-                startDate.toInstant()
+                startDate
                         .truncatedTo(ChronoUnit.DAYS)
-                        .plusSeconds(notificationStartAsLocalTime.toSecondOfDay());
+                        .plusSeconds(start.toLocalTime().toSecondOfDay())
+                        .minus(ilePrzedEventemMaMniePoinformowac, ChronoUnit.MILLIS);
 
         notificationEndDate =
-                endDate.toInstant()
+                endDate
                         .truncatedTo(ChronoUnit.DAYS)
-                        .plusSeconds(notificationStartAsLocalTime.toSecondOfDay());
+                        .plusSeconds(start.toLocalTime().toSecondOfDay())
+                        .minus(ilePrzedEventemMaMniePoinformowac, ChronoUnit.MILLIS);
 
     }
 }

@@ -12,7 +12,7 @@ import com.archangel_design.babycentral.enums.ScheduleEntryType;
 import lombok.Getter;
 
 import java.sql.Time;
-import java.util.Date;
+import java.time.Instant;
 
 @Getter
 public class ScheduleEntryRequest {
@@ -22,6 +22,6 @@ public class ScheduleEntryRequest {
     private Time stop;
     private ScheduleEntryPriority priority;
     private ScheduleEntryRepeatType repeatType;
-    private Date startDate;
-    private Date endDate;
+    private Instant startDate;
+    private Instant endDate;
 }
