@@ -23,6 +23,7 @@ import java.time.Instant;
 import static java.time.temporal.ChronoField.*;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -97,7 +98,10 @@ public class ScheduleService {
     public List<ScheduleEntity> getList() {
         UserEntity user = sessionService.getCurrentSession().getUser();
 
-        return scheduleRepository.fetchList(user);
+        if (user.getOrganization() == null)
+            return scheduleRepository.fetchList(user);
+
+        return scheduleRepository.fetchList(user.getOrganization());
     }
 
     public ScheduleEntity fetch(String uuid) {

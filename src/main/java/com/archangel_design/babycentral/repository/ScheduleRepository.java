@@ -6,6 +6,7 @@
 
 package com.archangel_design.babycentral.repository;
 
+import com.archangel_design.babycentral.entity.OrganizationEntity;
 import com.archangel_design.babycentral.entity.ScheduleEntity;
 import com.archangel_design.babycentral.entity.ScheduleEntryEntity;
 import com.archangel_design.babycentral.entity.UserEntity;
@@ -15,9 +16,8 @@ import org.springframework.stereotype.Repository;
 import javax.persistence.TemporalType;
 import javax.persistence.TypedQuery;
 import javax.validation.constraints.NotNull;
-import java.time.Duration;
-import java.time.Instant;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Repository
 public class ScheduleRepository extends GenericRepository {
@@ -51,6 +51,32 @@ public class ScheduleRepository extends GenericRepository {
         );
 
         query.setParameter("uid", user.getId());
+
+        return query.getResultList();
+    }
+
+    public List<ScheduleEntity> fetchList(List <UserEntity> users) {
+        TypedQuery<ScheduleEntity> query = em.createQuery(
+            "SELECT s FROM ScheduleEntity s " +
+            "WHERE s.us.id IN :ids", ScheduleEntity.class
+        );
+
+        List<Long> ids = users.stream()
+                .map(u -> u.getId())
+                .collect(Collectors.toList());
+
+        query.setParameter("ids", Arrays.asList(ids.toArray()));
+
+        return query.getResultList();
+    }
+
+    public List<ScheduleEntity> fetchList(OrganizationEntity organization) {
+        TypedQuery<ScheduleEntity> query = em.createQuery(
+            "SELECT s FROM ScheduleEntity s " +
+            "WHERE s.user.organization.id = :ogid", ScheduleEntity.class
+        );
+
+        query.setParameter("ogid", organization.getId());
 
         return query.getResultList();
     }
